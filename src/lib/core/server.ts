@@ -70,7 +70,7 @@ export async function protectedFetch<T>(
 export async function serverMutation<T>(
   path: string,
   data: unknown,
-  method: "POST" | "PUT" | "DELETE" = "POST",
+  method: "POST" | "PUT" | "PATCH" | "DELETE" = "POST",
 ): Promise<T> {
   const cookieStore = await cookies();
   const headerStore = await headers();

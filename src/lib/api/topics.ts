@@ -34,16 +34,19 @@ export async function getTopic(id: string): Promise<Topic> {
   return protectedFetch<Topic>(`/api/topics/${id}`);
 }
 
-export async function createTopic(
-  data: Omit<
-    Topic,
-    | "_id"
-    | "ownerId"
-    | "ownerName"
-    | "conceptCount"
-    | "masteredCount"
-    | "createdAt"
-  >,
-): Promise<Topic> {
+export interface CreateTopicRequest {
+  name: string;
+  description: string;
+  category: string;
+}
+
+export async function createTopic(data: CreateTopicRequest): Promise<Topic> {
   return serverMutation<Topic>("/api/topics", data, "POST");
+}
+
+export async function updateTopic(
+  id: string,
+  data: Pick<Topic, "name" | "description" | "category">,
+): Promise<Topic> {
+  return serverMutation<Topic>(`/api/topics/${id}`, data, "PATCH");
 }
