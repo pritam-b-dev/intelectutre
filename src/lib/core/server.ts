@@ -1,8 +1,7 @@
 "use server";
 
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import { redirect } from "next/navigation";
-import { headers } from "next/headers";
 
 const SERVER_URL =
   process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
@@ -26,7 +25,6 @@ export async function serverFetch<T>(
   return res.json() as Promise<T>;
 }
 
-// 🌟 CSRF জটমুক্ত চূড়ান্ত protectedFetch
 export async function protectedFetch<T>(
   path: string,
   options: RequestInit = {},
@@ -34,31 +32,31 @@ export async function protectedFetch<T>(
   const cookieStore = await cookies();
   const headerStore = await headers();
 
-  // কুকি স্টোর থেকে সরাসরি সেশন টোকেনটি তুলে আনা হচ্ছে
-  const sessionToken =
-    cookieStore.get("better-auth.session_token")?.value ||
-    cookieStore.get("__Secure-better-auth.session_token")?.value;
-
-  const userAgent = headerStore.get("user-agent") || "";
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
 
   const requestHeaders = new Headers(options.headers);
-  requestHeaders.set("Content-Type", "application/json");
-  requestHeaders.set("User-Agent", userAgent);
 
-  // 🌟 চক্রান্ত ভাঙার মূল চাবিকাঠি: কুকি হেডার পুরোপুরি ওমিট (বাদ) করা হয়েছে।
-  // শুধু Bearer টোকেন পাস হবে, যা Better-Auth এর খিটখিটে CSRF চেক বাইপাস করবে।
-  if (sessionToken) {
-    requestHeaders.set("Authorization", `Bearer ${sessionToken}`);
+  requestHeaders.set("Content-Type", "application/json");
+
+  const userAgent = headerStore.get("user-agent");
+  if (userAgent) {
+    requestHeaders.set("User-Agent", userAgent);
   }
 
-  const res = await fetch(`${baseUrl}${path}`, {
+  if (cookieHeader) {
+    requestHeaders.set("Cookie", cookieHeader);
+  }
+
+  const res = await fetch(`${SERVER_URL}${path}`, {
     ...options,
     headers: requestHeaders,
+    cache: "no-store",
   });
 
   if (res.status === 401) {
-    console.error(`[Explore Debug] 401 Unauthorized for path: ${path}`);
     redirect("/signin");
   }
 
@@ -69,7 +67,6 @@ export async function protectedFetch<T>(
   return res.json();
 }
 
-// 🌟 CSRF জটমুক্ত চূড়ান্ত serverMutation
 export async function serverMutation<T>(
   path: string,
   data: unknown,
@@ -78,25 +75,29 @@ export async function serverMutation<T>(
   const cookieStore = await cookies();
   const headerStore = await headers();
 
-  const sessionToken =
-    cookieStore.get("better-auth.session_token")?.value ||
-    cookieStore.get("__Secure-better-auth.session_token")?.value;
-
-  const userAgent = headerStore.get("user-agent") || "";
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+  const cookieHeader = cookieStore
+    .getAll()
+    .map((c) => `${c.name}=${c.value}`)
+    .join("; ");
 
   const requestHeaders = new Headers();
-  requestHeaders.set("Content-Type", "application/json");
-  requestHeaders.set("User-Agent", userAgent);
 
-  if (sessionToken) {
-    requestHeaders.set("Authorization", `Bearer ${sessionToken}`);
+  requestHeaders.set("Content-Type", "application/json");
+
+  const userAgent = headerStore.get("user-agent");
+  if (userAgent) {
+    requestHeaders.set("User-Agent", userAgent);
   }
 
-  const res = await fetch(`${baseUrl}${path}`, {
+  if (cookieHeader) {
+    requestHeaders.set("Cookie", cookieHeader);
+  }
+
+  const res = await fetch(`${SERVER_URL}${path}`, {
     method,
     headers: requestHeaders,
     body: JSON.stringify(data),
+    cache: "no-store",
   });
 
   if (res.status === 401) {
