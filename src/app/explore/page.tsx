@@ -1,0 +1,164 @@
+import { headers } from "next/headers";
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { Suspense } from "react";
+import { FaBrain } from "react-icons/fa6";
+import { FilterControls } from "./FilterControls";
+
+interface Topic {
+  _id: string;
+  name: string;
+  description: string;
+  category: string;
+  conceptCount: number;
+}
+
+// 🌟 B5 (GET /api/topics) এ কানেক্ট করার জন্য getTopics ফাংশন
+async function getTopics(category: string, sort: string) {
+  const headerStore = await headers();
+  const cookieHeader = headerStore.get("cookie") || "";
+  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
+
+  const res = await fetch(
+    `${baseUrl}/api/topics?category=${category}&sort=${sort}`,
+    {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Cookie: cookieHeader, // raw কুকি পাস করা হলো
+        Origin: "http://localhost:3000", // 🌟 Better-Auth এর CORS ও সিএসআরএফ ভ্যালিডেশন পাস করার জন্য এটি জরুরি
+      },
+      cache: "no-store",
+    },
+  );
+
+  // যদি সেশন ফেইল করে তবেই রিডাইরেক্ট হবে
+  if (res.status === 401) {
+    redirect("/signin");
+  }
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch topics");
+  }
+
+  return res.json();
+}
+
+// Skeleton Loader Component
+function TopicSkeletonGrid() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {[...Array(8)].map((_, i) => (
+        <div
+          key={i}
+          className="border border-zinc-800 bg-zinc-900/20 rounded-xl p-5 space-y-4 animate-pulse"
+        >
+          <div className="w-full h-32 bg-zinc-800/50 rounded-lg" />
+          <div className="h-5 bg-zinc-800/50 rounded w-2/3" />
+          <div className="space-y-2">
+            <div className="h-3 bg-zinc-800/50 rounded" />
+            <div className="h-3 bg-zinc-800/50 rounded w-5/6" />
+          </div>
+          <div className="h-9 bg-zinc-800/50 rounded-lg w-full" />
+        </div>
+      ))}
+    </div>
+  );
+}
+
+// ডেটা রেন্ডারিং গ্রিড
+async function TopicsGrid({
+  category,
+  sort,
+}: {
+  category: string;
+  sort: string;
+}) {
+  const data = await getTopics(category, sort);
+  const topics: Topic[] = data.items || [];
+
+  if (topics.length === 0) {
+    return (
+      <div className="text-center py-12 border border-dashed border-zinc-800 rounded-xl bg-zinc-900/10">
+        <p className="text-zinc-500">No topics found matching your criteria.</p>
+      </div>
+    );
+  }
+
+  return (
+    /* 🌟 রিকোয়ারমেন্ট: desktop এ ৪টি (lg:grid-cols-4), tablet এ ২টি (sm:grid-cols-2), mobile এ ১টি কার্ড */
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      {topics.map((topic) => (
+        <div
+          key={topic._id}
+          className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/40 hover:bg-zinc-900/70 transition-all flex flex-col justify-between group shadow-xl"
+        >
+          <div>
+            {/* 🌟 রিকোয়ারমেন্ট: Image Placeholder */}
+            <div className="w-full h-32 bg-zinc-800/30 border border-zinc-800 rounded-lg mb-4 flex items-center justify-center text-zinc-600 text-xs select-none">
+              Image Placeholder
+            </div>
+
+            <div className="flex justify-between items-start mb-2">
+              <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">
+                {topic.category}
+              </span>
+              {/* 🌟 Concept Count */}
+              <span className="text-xs text-zinc-500">
+                {topic.conceptCount || 0} Concepts
+              </span>
+            </div>
+
+            {/* 🌟 Topic Name & Description */}
+            <h3 className="text-base font-semibold mb-1 text-zinc-200 group-hover:text-purple-400 transition-colors line-clamp-1">
+              {topic.name}
+            </h3>
+            <p className="text-zinc-400 text-xs line-clamp-3 mb-4 leading-relaxed">
+              {topic.description}
+            </p>
+          </div>
+
+          {/* 🌟 রিকোয়ারমেন্ট: "View" Button linking to /topics/[id] */}
+          <Link
+            href={`/topics/${topic._id}`}
+            className="flex items-center justify-center w-full bg-zinc-800 hover:bg-purple-600 text-zinc-200 hover:text-white text-xs font-medium py-2 rounded-lg transition-colors"
+          >
+            View
+          </Link>
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export default async function ExploreTopicsPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ category?: string; sort?: string }>;
+}) {
+  const params = await searchParams;
+  const category = params.category || "all";
+  const sort = params.sort || "newest";
+
+  return (
+    <div className="container mx-auto p-6 min-h-screen text-zinc-100">
+      <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-zinc-800 pb-6">
+        <div>
+          <h1 className="text-2xl font-bold flex items-center gap-2">
+            <FaBrain className="text-purple-500" /> Explore Topics
+          </h1>
+          <p className="text-zinc-400 text-xs mt-1">
+            Browse and learn from available AI-curated topics
+          </p>
+        </div>
+
+        <FilterControls currentCategory={category} currentSort={sort} />
+      </div>
+
+      {/* 🌟 রিকোয়ারমেন্ট: Include skeleton loader while data loads */}
+      <Suspense key={category + sort} fallback={<TopicSkeletonGrid />}>
+        <TopicsGrid category={category} sort={sort} />
+      </Suspense>
+    </div>
+  );
+}

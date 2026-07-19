@@ -2,13 +2,11 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-hot-toast";
 import { FaBrain, FaSpinner } from "react-icons/fa6";
 
 export default function SignUpPage() {
-  const router = useRouter();
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
@@ -34,12 +32,11 @@ export default function SignUpPage() {
           toast.error(ctx.error.message || "Registration failed. Try again.");
           setIsLoading(false);
         },
+
         onSuccess: () => {
           toast.success(
             "Account created successfully! Welcome to Intelecture.",
           );
-          router.push("/dashboard");
-          router.refresh();
         },
       },
     });

@@ -2,18 +2,37 @@
 
 import * as React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-hot-toast";
-import { FaBrain, FaGoogle, FaSpinner } from "react-icons/fa6";
+import { FaBrain, FaGoogle, FaSpinner, FaUserCheck } from "react-icons/fa6";
 
 export default function SignInPage() {
-  const router = useRouter();
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
   const [isGoogleLoading, setIsGoogleLoading] = React.useState(false);
 
+  // 🌟 catch (err) এর জায়গায় শুধু catch (_) করে দিন
+  const handleDemoLogin = async () => {
+    const demoEmail = "demo@intelecture.com";
+    const demoPassword = "Password123";
+
+    setEmail(demoEmail);
+    setPassword(demoPassword);
+    setIsLoading(true);
+
+    try {
+      await authClient.signIn.email({
+        email: demoEmail,
+        password: demoPassword,
+        callbackURL: "/dashboard",
+      });
+      toast.success("Logged in as Demo User!");
+    } catch {
+      toast.error("Demo login failed");
+      setIsLoading(false);
+    }
+  };
   const handleEmailSignIn = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!email || !password) {
@@ -30,10 +49,9 @@ export default function SignInPage() {
           toast.error(ctx.error.message || "Invalid email or password");
           setIsLoading(false);
         },
+
         onSuccess: () => {
           toast.success("Welcome back to Intelecture!");
-          router.push("/dashboard");
-          router.refresh();
         },
       },
     });
@@ -89,7 +107,12 @@ export default function SignInPage() {
           </div>
 
           <div className="space-y-1.5">
-            <label htmlFor="password">Password</label>
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-zinc-200"
+            >
+              Password
+            </label>
             <input
               id="password"
               type="password"
@@ -122,6 +145,17 @@ export default function SignInPage() {
             Or continue with
           </span>
         </div>
+
+        {/* 🌟 ২. রিকোয়ার্ড ডেমো লগইন বাটন যুক্ত করা হলো */}
+        <button
+          type="button"
+          className="w-full flex items-center justify-center gap-2 border border-dashed border-purple-500/40 bg-purple-500/10 hover:bg-purple-500/20 text-purple-300 text-sm font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleDemoLogin}
+          disabled={isLoading || isGoogleLoading}
+        >
+          <FaUserCheck className="h-4 w-4 text-purple-400" />
+          Explore with Demo Account
+        </button>
 
         {/* Social Login */}
         <button
