@@ -1,50 +1,12 @@
-import { headers } from "next/headers";
-import Link from "next/link";
-import { redirect } from "next/navigation";
 import { Suspense } from "react";
+import Link from "next/link";
 import { FaBrain } from "react-icons/fa6";
+// 🌟 আপনার অ্যাকশন ফাইলের সঠিক পাথটি এখানে দিন
+
 import { FilterControls } from "./FilterControls";
+import { getTopics } from "../../lib/api/topics";
 
-interface Topic {
-  _id: string;
-  name: string;
-  description: string;
-  category: string;
-  conceptCount: number;
-}
-
-// 🌟 B5 (GET /api/topics) এ কানেক্ট করার জন্য getTopics ফাংশন
-async function getTopics(category: string, sort: string) {
-  const headerStore = await headers();
-  const cookieHeader = headerStore.get("cookie") || "";
-  const baseUrl = process.env.NEXT_PUBLIC_SERVER_URL || "http://localhost:5000";
-
-  const res = await fetch(
-    `${baseUrl}/api/topics?category=${category}&sort=${sort}`,
-    {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Cookie: cookieHeader, // raw কুকি পাস করা হলো
-        Origin: "http://localhost:3000", // 🌟 Better-Auth এর CORS ও সিএসআরএফ ভ্যালিডেশন পাস করার জন্য এটি জরুরি
-      },
-      cache: "no-store",
-    },
-  );
-
-  // যদি সেশন ফেইল করে তবেই রিডাইরেক্ট হবে
-  if (res.status === 401) {
-    redirect("/signin");
-  }
-
-  if (!res.ok) {
-    throw new Error("Failed to fetch topics");
-  }
-
-  return res.json();
-}
-
-// Skeleton Loader Component
+// 🌟 রিকোয়ারমেন্ট: Include skeleton loader while data loads
 function TopicSkeletonGrid() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -66,7 +28,7 @@ function TopicSkeletonGrid() {
   );
 }
 
-// ডেটা রেন্ডারিং গ্রিড
+// ডেটা লোড এবং রেন্ডার করার ইন্টারনাল কম্পোনেন্ট
 async function TopicsGrid({
   category,
   sort,
@@ -74,8 +36,9 @@ async function TopicsGrid({
   category: string;
   sort: string;
 }) {
-  const data = await getTopics(category, sort);
-  const topics: Topic[] = data.items || [];
+  // 🌟 রিকোয়ারমেন্ট: call getTopics() সার্ভার অ্যাকশন
+  const data = await getTopics({ category, sort });
+  const topics = data.items || [];
 
   if (topics.length === 0) {
     return (
@@ -86,7 +49,7 @@ async function TopicsGrid({
   }
 
   return (
-    /* 🌟 রিকোয়ারমেন্ট: desktop এ ৪টি (lg:grid-cols-4), tablet এ ২টি (sm:grid-cols-2), mobile এ ১টি কার্ড */
+    /* 🌟 রিকোয়ারমেন্ট: responsive card grid (4 per row desktop, 2 tablet, 1 mobile) */
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
       {topics.map((topic) => (
         <div
@@ -94,7 +57,7 @@ async function TopicsGrid({
           className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/40 hover:bg-zinc-900/70 transition-all flex flex-col justify-between group shadow-xl"
         >
           <div>
-            {/* 🌟 রিকোয়ারমেন্ট: Image Placeholder */}
+            {/* 🌟 রিকোয়ারমেন্ট: image placeholder */}
             <div className="w-full h-32 bg-zinc-800/30 border border-zinc-800 rounded-lg mb-4 flex items-center justify-center text-zinc-600 text-xs select-none">
               Image Placeholder
             </div>
@@ -103,13 +66,13 @@ async function TopicsGrid({
               <span className="text-[10px] font-semibold uppercase tracking-wider text-purple-400 bg-purple-500/10 px-2 py-0.5 rounded">
                 {topic.category}
               </span>
-              {/* 🌟 Concept Count */}
+              {/* 🌟 রিকোয়ারমেন্ট: concept count */}
               <span className="text-xs text-zinc-500">
                 {topic.conceptCount || 0} Concepts
               </span>
             </div>
 
-            {/* 🌟 Topic Name & Description */}
+            {/* 🌟 রিকোয়ারমেন্ট: topic name, description */}
             <h3 className="text-base font-semibold mb-1 text-zinc-200 group-hover:text-purple-400 transition-colors line-clamp-1">
               {topic.name}
             </h3>
@@ -118,7 +81,7 @@ async function TopicsGrid({
             </p>
           </div>
 
-          {/* 🌟 রিকোয়ারমেন্ট: "View" Button linking to /topics/[id] */}
+          {/* 🌟 রিকোয়ারমেন্ট: "View" button → /topics/[id] */}
           <Link
             href={`/topics/${topic._id}`}
             className="flex items-center justify-center w-full bg-zinc-800 hover:bg-purple-600 text-zinc-200 hover:text-white text-xs font-medium py-2 rounded-lg transition-colors"
@@ -131,6 +94,7 @@ async function TopicsGrid({
   );
 }
 
+// 🌟 রিকোয়ারমেন্ট: async Server Component
 export default async function ExploreTopicsPage({
   searchParams,
 }: {
@@ -142,6 +106,7 @@ export default async function ExploreTopicsPage({
 
   return (
     <div className="container mx-auto p-6 min-h-screen text-zinc-100">
+      {/* Header & Filter Controls */}
       <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4 border-b border-zinc-800 pb-6">
         <div>
           <h1 className="text-2xl font-bold flex items-center gap-2">
@@ -155,7 +120,7 @@ export default async function ExploreTopicsPage({
         <FilterControls currentCategory={category} currentSort={sort} />
       </div>
 
-      {/* 🌟 রিকোয়ারমেন্ট: Include skeleton loader while data loads */}
+      {/* Suspense Wraps the Grid with Skeleton Fallback */}
       <Suspense key={category + sort} fallback={<TopicSkeletonGrid />}>
         <TopicsGrid category={category} sort={sort} />
       </Suspense>

@@ -20,6 +20,7 @@ export function FilterControls({
 
   return (
     <div className="flex gap-4 w-full md:w-auto">
+      {/* 🌟 রিকোয়ারমেন্ট: filter by category dropdown */}
       <select
         value={currentCategory}
         onChange={(e) => updateParam("category", e.target.value)}
@@ -31,6 +32,7 @@ export function FilterControls({
         <option value="math">Mathematics</option>
       </select>
 
+      {/* 🌟 রিকোয়ারমেন্ট: sort by dropdown */}
       <select
         value={currentSort}
         onChange={(e) => updateParam("sort", e.target.value)}
