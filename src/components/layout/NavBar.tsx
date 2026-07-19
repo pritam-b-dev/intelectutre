@@ -53,8 +53,8 @@ export default function NavBar() {
           <Link href="/" className={linkStyle("/")}>
             Home
           </Link>
-          <Link href="/explore" className={linkStyle("/explore")}>
-            Explore
+          <Link href="/topics" className={linkStyle("/topics")}>
+            Explore Topics
           </Link>
 
           {session && (

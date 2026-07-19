@@ -1,10 +1,9 @@
 import { Suspense } from "react";
 import Link from "next/link";
 import { FaBrain } from "react-icons/fa6";
-// 🌟 আপনার অ্যাকশন ফাইলের সঠিক পাথটি এখানে দিন
 
-import { FilterControls } from "./FilterControls";
 import { getTopics } from "../../lib/api/topics";
+import { FilterControls } from "./FilterControls";
 
 // 🌟 রিকোয়ারমেন্ট: Include skeleton loader while data loads
 function TopicSkeletonGrid() {
