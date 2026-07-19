@@ -1,16 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import * as React from "react";
 import Link from "next/link";
-import toast from "react-hot-toast";
-import { FaGoogle, FaUser, FaLock, FaEnvelope } from "react-icons/fa";
-import { signUp, signIn } from "@/lib/auth-client";
+import { useRouter } from "next/navigation";
+import { authClient } from "@/lib/auth-client";
+import { toast } from "react-hot-toast";
+import { FaBrain, FaSpinner } from "react-icons/fa6";
 
 export default function SignUpPage() {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [loading, setLoading] = useState(false);
+  const router = useRouter();
+  const [name, setName] = React.useState("");
+  const [email, setEmail] = React.useState("");
+  const [password, setPassword] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(false);
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -21,136 +23,119 @@ export default function SignUpPage() {
       return toast.error("Password must be at least 6 characters long");
     }
 
-    setLoading(true);
-    try {
-      await signUp.email({
-        email,
-        password,
-        name,
-        callbackURL: "/dashboard",
-      });
-      toast.success("Account created successfully!");
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error
-          ? err.message
-          : "Registration failed. Please try again.";
-      toast.error(errorMessage);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleGoogleSignIn = async () => {
-    try {
-      await signIn.social({
-        provider: "google",
-        callbackURL: `${window.location.origin}/callback`,
-      });
-    } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : "Google authentication failed";
-      toast.error(errorMessage);
-    }
+    setIsLoading(true);
+    await authClient.signUp.email({
+      email,
+      password,
+      name,
+      callbackURL: "/dashboard",
+      fetchOptions: {
+        onError: (ctx) => {
+          toast.error(ctx.error.message || "Registration failed. Try again.");
+          setIsLoading(false);
+        },
+        onSuccess: () => {
+          toast.success(
+            "Account created successfully! Welcome to Intelecture.",
+          );
+          router.push("/dashboard");
+          router.refresh();
+        },
+      },
+    });
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-zinc-50 dark:bg-zinc-950 px-4 py-12 transition-colors duration-200">
-      <div className="w-full max-w-md bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-2xl p-8 space-y-6 shadow-xl transition-colors duration-200">
+    <div className="container flex h-screen w-screen flex-col items-center justify-center mx-auto px-4">
+      <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px] border border-zinc-800 p-6 rounded-xl bg-zinc-900/50 shadow-xl backdrop-blur-sm">
         {/* Header */}
-        <div className="text-center space-y-2">
-          <h2 className="text-3xl font-bold text-teal-brand font-heading">
-            Get Started
-          </h2>
-          <p className="text-zinc-500 dark:text-zinc-400 text-sm font-body">
-            Create your Intellecture account today
+        <div className="flex flex-col space-y-2 text-center">
+          <FaBrain className="mx-auto h-8 w-8 text-purple-500 animate-pulse" />
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Create an Account
+          </h1>
+          <p className="text-sm text-zinc-400">
+            Get started with your customized AI learning engine
           </p>
         </div>
 
-        {/* Google OAuth Button */}
-        <button
-          onClick={handleGoogleSignIn}
-          className="w-full flex items-center justify-center gap-3 py-3 px-4 bg-zinc-100 dark:bg-zinc-800 hover:bg-zinc-200 dark:hover:bg-zinc-700 text-zinc-900 dark:text-zinc-100 font-medium rounded-xl border border-zinc-200 dark:border-zinc-700 transition duration-200 cursor-pointer"
-        >
-          <FaGoogle className="text-rose-500 text-lg" />
-          <span className="font-heading text-sm">Sign up with Google</span>
-        </button>
-
-        {/* Divider */}
-        <div className="flex items-center my-4 text-xs text-zinc-400 dark:text-zinc-500 uppercase before:flex-1 before:border-t before:border-zinc-200 before:dark:border-zinc-800 before:mr-3 after:flex-1 after:border-t after:border-zinc-200 after:dark:border-zinc-800 after:ml-3 font-mono">
-          Or with email
-        </div>
-
-        {/* Registration Form */}
+        {/* SignUp Form */}
         <form onSubmit={handleEmailSignUp} className="space-y-4">
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 font-heading">
+          <div className="space-y-1.5">
+            <label htmlFor="name" className="text-sm font-medium text-zinc-200">
               Full Name
             </label>
-            <div className="relative flex items-center">
-              <FaUser className="absolute left-4 text-zinc-400 dark:text-zinc-500" />
-              <input
-                type="text"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                placeholder="John Doe"
-                className="w-full pl-11 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-teal-brand dark:focus:border-teal-brand transition text-sm font-body"
-                required
-              />
-            </div>
+            <input
+              id="name"
+              type="text"
+              placeholder="John Doe"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              disabled={isLoading}
+              required
+              className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 font-heading">
+          <div className="space-y-1.5">
+            <label
+              htmlFor="email"
+              className="text-sm font-medium text-zinc-200"
+            >
               Email Address
             </label>
-            <div className="relative flex items-center">
-              <FaEnvelope className="absolute left-4 text-zinc-400 dark:text-zinc-500" />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="you@example.com"
-                className="w-full pl-11 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-teal-brand dark:focus:border-teal-brand transition text-sm font-body"
-                required
-              />
-            </div>
+            <input
+              id="email"
+              type="email"
+              placeholder="name@example.com"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              disabled={isLoading}
+              required
+              className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            />
           </div>
 
-          <div className="space-y-1">
-            <label className="text-xs font-semibold text-zinc-600 dark:text-zinc-400 font-heading">
+          <div className="space-y-1.5">
+            <label
+              htmlFor="password"
+              className="text-sm font-medium text-zinc-200"
+            >
               Password
             </label>
-            <div className="relative flex items-center">
-              <FaLock className="absolute left-4 text-zinc-400 dark:text-zinc-500" />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Minimum 6 characters"
-                className="w-full pl-11 pr-4 py-3 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl text-zinc-900 dark:text-zinc-100 focus:outline-none focus:border-teal-brand dark:focus:border-teal-brand transition text-sm font-body"
-                required
-              />
-            </div>
+            <input
+              id="password"
+              type="password"
+              placeholder="••••••••"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              disabled={isLoading}
+              required
+              className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            />
           </div>
 
           <button
             type="submit"
-            disabled={loading}
-            className="w-full py-3 bg-teal-brand text-zinc-950 font-bold rounded-xl hover:bg-[#00c4a3] transition duration-200 disabled:opacity-50 font-heading cursor-pointer shadow-md shadow-teal-brand/10"
+            className="w-full flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm py-2 rounded-lg gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            disabled={isLoading}
           >
-            {loading ? "Creating account..." : "Sign Up"}
+            {isLoading ? (
+              <FaSpinner className="h-4 w-4 animate-spin" />
+            ) : (
+              "Create Account"
+            )}
           </button>
         </form>
 
         {/* Footer Link */}
-        <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 font-body">
+        <p className="px-8 text-center text-sm text-zinc-400">
           Already have an account?{" "}
           <Link
             href="/signin"
-            className="text-teal-brand hover:underline font-semibold"
+            className="hover:text-purple-400 underline underline-offset-4 font-medium text-zinc-200"
           >
-            Sign in
+            Sign In
           </Link>
         </p>
       </div>
