@@ -61,7 +61,7 @@ export default function SignInPage() {
     setIsGoogleLoading(true);
     await authClient.signIn.social({
       provider: "google",
-
+      callbackURL: `${window.location.origin}/dashboard`,
       fetchOptions: {
         onError: (ctx) => {
           toast.error(ctx.error.message || "Google sign in failed");
