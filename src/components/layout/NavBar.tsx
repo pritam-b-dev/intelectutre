@@ -54,7 +54,7 @@ export default function NavBar() {
             Home
           </Link>
           <Link href="/topics/manage" className={linkStyle("/topics/manage")}>
-            Explore Topics
+            Manage Topics
           </Link>
 
           {session && (
@@ -63,10 +63,7 @@ export default function NavBar() {
                 Dashboard
                 <FaBrain className="h-3 w-3 text-purple-500 animate-pulse" />
               </Link>
-              <Link
-                href="/topics/manage"
-                className={linkStyle("/topics/manage")}
-              >
+              <Link href="/topics" className={linkStyle("/topics")}>
                 Topics
               </Link>
               <Link href="/chat" className={linkStyle("/chat")}>
