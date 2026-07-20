@@ -20,26 +20,56 @@ export function FilterControls({
 
   return (
     <div className="flex gap-4 w-full md:w-auto">
-      {/* 🌟 রিকোয়ারমেন্ট: filter by category dropdown */}
+      {/* Category Dropdown */}
       <select
         value={currentCategory}
         onChange={(e) => updateParam("category", e.target.value)}
-        className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-zinc-200 cursor-pointer"
+        className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 text-zinc-800 dark:text-zinc-200 cursor-pointer transition-colors"
       >
-        <option value="all">All Categories</option>
-        <option value="tech">Technology</option>
-        <option value="science">Science</option>
-        <option value="math">Mathematics</option>
+        <option
+          value="all"
+          className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+        >
+          All Categories
+        </option>
+        <option
+          value="tech"
+          className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+        >
+          Technology
+        </option>
+        <option
+          value="science"
+          className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+        >
+          Science
+        </option>
+        <option
+          value="math"
+          className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+        >
+          Mathematics
+        </option>
       </select>
 
-      {/* 🌟 রিকোয়ারমেন্ট: sort by dropdown */}
+      {/* Sort Dropdown */}
       <select
         value={currentSort}
         onChange={(e) => updateParam("sort", e.target.value)}
-        className="bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500 text-zinc-200 cursor-pointer"
+        className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 text-zinc-800 dark:text-zinc-200 cursor-pointer transition-colors"
       >
-        <option value="newest">Newest</option>
-        <option value="popularity">Popularity</option>
+        <option
+          value="newest"
+          className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+        >
+          Newest
+        </option>
+        <option
+          value="popularity"
+          className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+        >
+          Popularity
+        </option>
       </select>
     </div>
   );

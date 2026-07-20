@@ -30,19 +30,19 @@ export default function ConceptDetailClient({
     switch (status) {
       case "mastered":
         return (
-          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-[#FFCF00]/10 text-[#FFCF00] border border-[#FFCF00]/30">
+          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-amber-100 text-amber-800 border border-amber-300 dark:bg-amber-500/10 dark:text-amber-400 dark:border-amber-500/30">
             Mastered
           </span>
         );
       case "learning":
         return (
-          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-[#00E0BA]/10 text-[#00E0BA] border border-[#00E0BA]/30">
+          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 dark:bg-emerald-500/10 dark:text-emerald-400 dark:border-emerald-500/30">
             Learning
           </span>
         );
       default:
         return (
-          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-zinc-700 text-zinc-300">
+          <span className="px-3 py-1 text-xs font-semibold rounded-full bg-zinc-100 text-zinc-700 border border-zinc-300 dark:bg-zinc-800 dark:text-zinc-300 dark:border-zinc-700">
             Not Started
           </span>
         );
@@ -61,7 +61,8 @@ export default function ConceptDetailClient({
         content,
       });
 
-      const newNote = (response as unknown as { data?: Note }).data || response;
+      const newNote =
+        (response as unknown as { data?: Note }).data || (response as Note);
       setNotes([newNote, ...notes]);
 
       setTitle("");
@@ -76,39 +77,39 @@ export default function ConceptDetailClient({
   };
 
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
+    <div className="space-y-8 text-zinc-900 dark:text-zinc-100 transition-colors">
+      {/* Header Card */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-white/80 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm transition-colors">
         <div className="space-y-2">
           <div className="flex items-center gap-3 flex-wrap">
-            <h1 className="text-3xl font-bold tracking-tight text-white">
+            <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-zinc-900 dark:text-zinc-100">
               {concept.name}
             </h1>
             {getStatusBadge(concept.status)}
           </div>
-          <p className="text-sm text-zinc-400">
+          <p className="text-sm text-zinc-600 dark:text-zinc-400">
             Difficulty Level:{" "}
-            <span className="font-semibold text-[#00E0BA]">
+            <span className="font-semibold text-purple-600 dark:text-purple-400">
               {concept.difficulty}/5
             </span>
           </p>
         </div>
 
-        {/* 🧠 Ask AI Button - Enabled */}
+        {/* 🧠 Ask AI Button */}
         <button
           onClick={() => setIsAiChatOpen(true)}
-          className="flex items-center justify-center gap-2 bg-[#91008D] hover:bg-[#a600a2] text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-[#91008D]/20 active:scale-95"
+          className="flex items-center justify-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-md shadow-purple-600/20 active:scale-95 text-sm"
         >
-          <FaBrain className="animate-pulse text-lg" /> Ask AI Tutor
+          <FaBrain className="animate-pulse text-base" /> Ask AI Tutor
         </button>
       </div>
 
       {/* Concept Description */}
-      <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
-        <h2 className="text-lg font-semibold text-zinc-200 mb-3">
+      <div className="p-6 bg-white/80 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl shadow-sm transition-colors">
+        <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-100 mb-3">
           Concept Overview
         </h2>
-        <p className="text-zinc-300 leading-relaxed whitespace-pre-line">
+        <p className="text-zinc-600 dark:text-zinc-300 leading-relaxed whitespace-pre-line text-sm sm:text-base">
           {concept.description}
         </p>
       </div>
@@ -116,34 +117,39 @@ export default function ConceptDetailClient({
       {/* Notes Section */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
-          <h2 className="text-xl font-bold text-white">My Study Notes</h2>
+          <h2 className="text-xl font-bold text-zinc-900 dark:text-zinc-100">
+            My Study Notes
+          </h2>
           {!isFormOpen && (
             <button
               onClick={() => setIsFormOpen(true)}
-              className="flex items-center gap-2 bg-[#00E0BA] hover:bg-[#00e0ba]/90 text-zinc-950 px-4 py-2 rounded-xl font-semibold transition"
+              className="flex items-center gap-2 bg-purple-600 hover:bg-purple-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-sm"
             >
-              <FaPlus /> Add Note
+              <FaPlus className="text-xs" /> Add Note
             </button>
           )}
         </div>
 
+        {/* New Note Form */}
         {isFormOpen && (
           <form
             onSubmit={handleAddNote}
-            className="p-6 bg-zinc-900 border border-[#00E0BA]/30 rounded-2xl space-y-4 animate-in fade-in slide-in-from-top-4 duration-200"
+            className="p-6 bg-white/90 dark:bg-zinc-900/60 border border-purple-200 dark:border-purple-500/30 rounded-2xl space-y-4 shadow-sm transition-colors animate-in fade-in slide-in-from-top-4 duration-200"
           >
-            <div className="flex justify-between items-center border-b border-zinc-800 pb-2">
-              <h3 className="font-semibold text-[#00E0BA]">Create New Note</h3>
+            <div className="flex justify-between items-center border-b border-zinc-200 dark:border-zinc-800 pb-2">
+              <h3 className="font-semibold text-purple-700 dark:text-purple-400 text-sm">
+                Create New Note
+              </h3>
               <button
                 type="button"
                 onClick={() => setIsFormOpen(false)}
-                className="text-zinc-400 hover:text-white"
+                className="text-zinc-400 hover:text-zinc-700 dark:hover:text-white transition-colors"
               >
                 <FaXmark size={18} />
               </button>
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-zinc-400 font-medium">
+              <label className="text-xs text-zinc-700 dark:text-zinc-400 font-medium">
                 Note Title
               </label>
               <input
@@ -152,11 +158,11 @@ export default function ConceptDetailClient({
                 value={title}
                 onChange={(e) => setTitle(e.target.value)}
                 placeholder="e.g., Summary of core formulas..."
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#00E0BA] transition"
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:border-purple-500 transition text-sm"
               />
             </div>
             <div className="space-y-1">
-              <label className="text-xs text-zinc-400 font-medium">
+              <label className="text-xs text-zinc-700 dark:text-zinc-400 font-medium">
                 Content
               </label>
               <textarea
@@ -165,21 +171,21 @@ export default function ConceptDetailClient({
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
                 placeholder="Write your study notes here..."
-                className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-2.5 text-white focus:outline-none focus:border-[#00E0BA] transition resize-none"
+                className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-2.5 text-zinc-900 dark:text-white placeholder-zinc-400 focus:outline-none focus:border-purple-500 transition resize-none text-sm"
               />
             </div>
             <div className="flex justify-end gap-3 pt-2">
               <button
                 type="button"
                 onClick={() => setIsFormOpen(false)}
-                className="px-4 py-2 rounded-xl text-zinc-400 hover:text-white transition"
+                className="px-4 py-2 rounded-xl text-xs font-medium text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isSubmitting}
-                className="bg-[#00E0BA] hover:bg-[#00e0ba]/90 text-zinc-950 font-semibold px-5 py-2 rounded-xl transition disabled:opacity-50"
+                className="bg-purple-600 hover:bg-purple-700 text-white font-semibold text-xs px-5 py-2 rounded-xl transition-colors disabled:opacity-50 shadow-sm"
               >
                 {isSubmitting ? "Saving..." : "Save Note"}
               </button>
@@ -187,9 +193,10 @@ export default function ConceptDetailClient({
           </form>
         )}
 
+        {/* Note List / Empty State */}
         {notes.length === 0 ? (
-          <div className="text-center py-12 border-2 border-dashed border-zinc-800 rounded-2xl">
-            <p className="text-zinc-500">
+          <div className="text-center py-12 border-2 border-dashed border-zinc-300 dark:border-zinc-800 rounded-2xl bg-zinc-50/50 dark:bg-zinc-900/10 transition-colors">
+            <p className="text-zinc-500 dark:text-zinc-400 text-sm">
               No notes added for this concept yet. Click &quot;Add Note&quot; to
               start.
             </p>
@@ -199,27 +206,33 @@ export default function ConceptDetailClient({
             {notes.map((note) => (
               <div
                 key={note._id}
-                className="p-5 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col sm:flex-row sm:items-start justify-between gap-4 hover:border-zinc-700 transition"
+                className="p-5 bg-white/80 dark:bg-zinc-900/40 border border-zinc-200 dark:border-zinc-800 rounded-2xl flex flex-col sm:flex-row sm:items-start justify-between gap-4 hover:border-zinc-300 dark:hover:border-zinc-700 shadow-sm transition-all"
               >
                 <div className="space-y-2 flex-1">
                   <div className="flex items-center gap-3">
-                    <h4 className="font-semibold text-white text-lg">
+                    <h4 className="font-semibold text-zinc-900 dark:text-zinc-100 text-base sm:text-lg">
                       {note.title}
                     </h4>
-                    <span className="text-xs px-2.5 py-0.5 rounded-md bg-zinc-800 text-zinc-400 border border-zinc-700 capitalize">
-                      {note.status.replace("_", " ")}
+                    <span className="text-xs px-2.5 py-0.5 rounded-md bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-400 border border-zinc-200 dark:border-zinc-700 capitalize font-medium">
+                      {note.status?.replace("_", " ") || "Note"}
                     </span>
                   </div>
-                  <p className="text-zinc-300 text-sm leading-relaxed whitespace-pre-line">
+                  <p className="text-zinc-600 dark:text-zinc-300 text-sm leading-relaxed whitespace-pre-line">
                     {note.content}
                   </p>
                 </div>
 
                 <div className="flex gap-2 self-end sm:self-start">
-                  <button className="p-2 text-zinc-400 hover:text-[#00E0BA] bg-zinc-950 border border-zinc-800 rounded-xl transition">
+                  <button
+                    className="p-2 text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl transition-colors"
+                    title="Edit Note"
+                  >
                     <FaPen size={14} />
                   </button>
-                  <button className="p-2 text-zinc-400 hover:text-[#FF3483] bg-zinc-950 border border-zinc-800 rounded-xl transition">
+                  <button
+                    className="p-2 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl transition-colors"
+                    title="Delete Note"
+                  >
                     <FaTrashCan size={14} />
                   </button>
                 </div>

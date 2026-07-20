@@ -52,7 +52,7 @@ export default function AddNoteFormClient({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="p-4 bg-red-500/10 border border-red-500/30 text-red-400 text-sm rounded-xl">
+        <div className="p-4 bg-red-50 dark:bg-red-500/10 border border-red-200 dark:border-red-500/30 text-red-600 dark:text-red-400 text-sm rounded-xl transition-colors">
           {error}
         </div>
       )}
@@ -61,9 +61,9 @@ export default function AddNoteFormClient({
       <div className="space-y-2">
         <label
           htmlFor="title"
-          className="text-sm font-medium text-zinc-300 block"
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block"
         >
-          Note Title <span className="text-red-400">*</span>
+          Note Title <span className="text-red-500 dark:text-red-400">*</span>
         </label>
         <input
           id="title"
@@ -71,7 +71,7 @@ export default function AddNoteFormClient({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="e.g., Key takeaways and architecture diagram"
-          className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00E0BA] transition"
+          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition text-sm"
         />
       </div>
 
@@ -79,7 +79,7 @@ export default function AddNoteFormClient({
       <div className="space-y-2">
         <label
           htmlFor="status"
-          className="text-sm font-medium text-zinc-300 block"
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block"
         >
           Current Status
         </label>
@@ -87,7 +87,7 @@ export default function AddNoteFormClient({
           id="status"
           value={status}
           onChange={(e) => setStatus(e.target.value as Note["status"])}
-          className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white focus:outline-none focus:border-[#00E0BA] transition appearance-none cursor-pointer"
+          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white focus:outline-none focus:border-purple-500 transition cursor-pointer text-sm"
         >
           <option value="not_started">Not Started</option>
           <option value="learning">Learning</option>
@@ -99,7 +99,7 @@ export default function AddNoteFormClient({
       <div className="space-y-2">
         <label
           htmlFor="content"
-          className="text-sm font-medium text-zinc-300 block"
+          className="text-sm font-medium text-zinc-700 dark:text-zinc-300 block"
         >
           Content / Study Notes
         </label>
@@ -109,23 +109,23 @@ export default function AddNoteFormClient({
           value={content}
           onChange={(e) => setContent(e.target.value)}
           placeholder="Write your detailed notes, code snippets, or explanations here..."
-          className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-4 py-3 text-white placeholder-zinc-600 focus:outline-none focus:border-[#00E0BA] transition resize-none font-sans"
+          className="w-full bg-zinc-50 dark:bg-zinc-950 border border-zinc-300 dark:border-zinc-800 rounded-xl px-4 py-3 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 focus:outline-none focus:border-purple-500 transition resize-none font-sans text-sm"
         />
       </div>
 
       {/* Actions */}
-      <div className="flex items-center justify-end gap-4 pt-2 border-t border-zinc-800">
+      <div className="flex items-center justify-end gap-4 pt-4 border-t border-zinc-200 dark:border-zinc-800">
         <button
           type="button"
           onClick={() => router.push(`/concepts/${conceptId}`)}
-          className="px-5 py-2.5 rounded-xl text-zinc-400 hover:text-white transition font-medium text-sm"
+          className="px-5 py-2.5 rounded-xl text-zinc-600 hover:text-zinc-900 dark:text-zinc-400 dark:hover:text-white transition-colors font-medium text-sm"
         >
           Cancel
         </button>
         <button
           type="submit"
           disabled={isSubmitting}
-          className="bg-[#00E0BA] hover:bg-[#00e0ba]/90 text-zinc-950 font-semibold px-6 py-2.5 rounded-xl transition disabled:opacity-50 text-sm shadow-lg shadow-[#00E0BA]/10"
+          className="bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-2.5 rounded-xl transition-all disabled:opacity-50 text-sm shadow-sm active:scale-95"
         >
           {isSubmitting ? "Creating..." : "Save Note"}
         </button>

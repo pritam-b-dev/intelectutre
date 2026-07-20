@@ -2,7 +2,38 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 
+/* 🌟 Light Theme Variables */
+:root {
+  --background: #ffffff;
+  --foreground: #09090b;
+  --card: #ffffff;
+  --card-foreground: #09090b;
+  --border: #e4e4e7;
+  --muted: #f4f4f5;
+  --muted-foreground: #71717a;
+}
+
+/* 🌟 Dark Theme Variables */
+.dark {
+  --background: #09090b;
+  --foreground: #fafafa;
+  --card: #18181b;
+  --card-foreground: #fafafa;
+  --border: #27272a;
+  --muted: #27272a;
+  --muted-foreground: #a1a1aa;
+}
+
 @theme {
+  /* Theme Mapped Colors */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-border: var(--border);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+
   /* Brand Colors */
   --color-teal-brand: #00e0ba;
   --color-purple-brand: #91008d;
@@ -13,16 +44,6 @@
   --font-heading: var(--font-space-grotesk), sans-serif;
   --font-body: var(--font-inter), sans-serif;
   --font-mono: var(--font-jetbrains-mono), monospace;
-}
-
-:root {
-  --background: #ffffff;
-  --foreground: #09090b;
-}
-
-.dark {
-  --background: #09090b;
-  --foreground: #fafafa;
 }
 
 @layer base {

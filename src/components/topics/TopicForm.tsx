@@ -58,47 +58,89 @@ export default function TopicForm({ mode, topic }: Props) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-6">
-      <div>
-        <label className="block text-sm font-medium mb-2">Topic Name</label>
-
+    <form
+      onSubmit={handleSubmit}
+      className="max-w-2xl mx-auto space-y-6 border border-zinc-200 dark:border-zinc-800 p-6 sm:p-8 rounded-xl bg-white/80 dark:bg-zinc-900/50 shadow-xl backdrop-blur-sm transition-colors"
+    >
+      {/* Topic Name */}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200">
+          Topic Name
+        </label>
         <input
-          className="w-full rounded-lg border px-4 py-3"
+          type="text"
+          placeholder="e.g. Advanced React Patterns"
+          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           value={name}
           onChange={(e) => setName(e.target.value)}
+          disabled={loading}
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Description</label>
-
+      {/* Description */}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200">
+          Description
+        </label>
         <textarea
           rows={5}
-          className="w-full rounded-lg border px-4 py-3"
+          placeholder="Describe what this topic covers..."
+          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           value={description}
           onChange={(e) => setDescription(e.target.value)}
+          disabled={loading}
         />
       </div>
 
-      <div>
-        <label className="block text-sm font-medium mb-2">Category</label>
-
+      {/* Category */}
+      <div className="space-y-1.5">
+        <label className="block text-sm font-medium text-zinc-700 dark:text-zinc-200">
+          Category
+        </label>
         <select
-          className="w-full rounded-lg border px-4 py-3"
+          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 px-4 py-3 text-sm text-zinc-900 dark:text-zinc-100 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
           value={category}
           onChange={(e) => setCategory(e.target.value)}
+          disabled={loading}
         >
-          <option>Programming</option>
-          <option>AI</option>
-          <option>Machine Learning</option>
-          <option>Web Development</option>
-          <option>Database</option>
+          <option
+            value="Programming"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            Programming
+          </option>
+          <option
+            value="AI"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            AI
+          </option>
+          <option
+            value="Machine Learning"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            Machine Learning
+          </option>
+          <option
+            value="Web Development"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            Web Development
+          </option>
+          <option
+            value="Database"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            Database
+          </option>
         </select>
       </div>
 
+      {/* Submit Button */}
       <button
+        type="submit"
         disabled={loading}
-        className="bg-indigo-600 text-white rounded-lg px-6 py-3 hover:bg-indigo-700 disabled:opacity-50"
+        className="w-full sm:w-auto bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm rounded-lg px-6 py-3 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
       >
         {loading
           ? "Saving..."
