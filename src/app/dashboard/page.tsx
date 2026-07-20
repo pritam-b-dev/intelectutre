@@ -6,56 +6,42 @@ import {
   FaChevronRight,
 } from "react-icons/fa6";
 import { getMyTopics } from "@/lib/api/topics";
-import { Recommendation, Topic } from "@/types";
-
-// ১. আপনার types/index.ts ফাইলের সাথে ১০০% ম্যাচ করা মক রেকমেন্ডেশন ডাটা
-const fakeRecommendations: Recommendation[] = [
-  {
-    conceptId: "concept_async_javascript",
-    conceptName: "Asynchronous JS & Event Loop",
-    topicId: "topic_js_advanced",
-    topicName: "Advanced JavaScript",
-    reason:
-      "You recently reviewed Promises. Mastering the Event Loop will unify your core runtime understanding.",
-    priority: 3, // 3 = High Priority
-    difficulty: 4,
-    aiGenerated: true,
-  },
-  {
-    conceptId: "concept_mongodb_indexing",
-    conceptName: "MongoDB Indexing Strategies",
-    topicId: "topic_mongodb",
-    topicName: "MongoDB Developer Guide",
-    reason:
-      "Based on your active backend setup, query performance can be optimized up to 10x using compound indexes.",
-    priority: 2, // 2 = Medium Priority
-    difficulty: 3,
-    aiGenerated: true,
-  },
-];
+import { getRecommendations } from "@/lib/api/recommendations"; // 🌟 রিয়েল API ফাংশন ইম্পোর্ট
+import { Topic, Recommendation } from "@/types";
 
 export default async function DashboardPage() {
   let topics: Topic[] = [];
+  let recommendations: Recommendation[] = [];
 
+  // ১. এপিআই থেকে টপিকস এবং রিয়েল রেকমেন্ডেশন ডাটা ফেচ করা
   try {
-    const response = await getMyTopics();
+    const [topicsResponse, recsResponse] = await Promise.all([
+      getMyTopics(),
+      getRecommendations(),
+    ]);
 
-    // এপিআই রেসপন্স টাইপ সেফলি চেক করা (ListResponse ফরম্যাট অথবা ডিরেক্ট অ্যারে)
-    if (response) {
-      if (Array.isArray(response)) {
-        topics = response as Topic[];
-      } else if (typeof response === "object" && "items" in response) {
-        topics = (response as { items: Topic[] }).items || [];
+    // টপিক রেসপন্স হ্যান্ডলিং
+    if (topicsResponse) {
+      if (Array.isArray(topicsResponse)) {
+        topics = topicsResponse as Topic[];
+      } else if (
+        typeof topicsResponse === "object" &&
+        "items" in topicsResponse
+      ) {
+        topics = (topicsResponse as { items: Topic[] }).items || [];
       }
     }
+
+    // রেকমেন্ডেশন রেসপন্স হ্যান্ডলিং (F12B: রিয়েল কল ও ক্যাচিং)
+    if (recsResponse && "items" in recsResponse) {
+      recommendations = recsResponse.items || [];
+    }
   } catch (error) {
-    console.error("Failed to fetch topics for dashboard stats:", error);
+    console.error("Failed to fetch dashboard data:", error);
   }
 
-  // ২. আপনার টপিক ইন্টারফেসের প্রোপার্টি ব্যবহার করে স্ট্যাটাস ক্যালকুলেশন
+  // ২. স্ট্যাটাস ক্যালকুলেশন
   const topicsStarted = topics.length;
-
-  // সরাসরি topic.masteredCount যোগ করা হচ্ছে, কোনো nested লুপের প্রয়োজন নেই
   const conceptsMastered = topics.reduce(
     (acc, topic) => acc + (topic.masteredCount || 0),
     0,
@@ -81,9 +67,9 @@ export default async function DashboardPage() {
     }
   }
 
-  // ৩. RecommendationPriority (1 | 2 | 3) অনুযায়ী স্টাইল ও লেবেল নির্ধারণকারী হেল্পার
+  // ৩. B6 লজিক অনুযায়ী (1 = High, 2 = Medium, 3 = Low) ব্যাজ ও স্টাইল ডিটেইলস
   const getPriorityDetails = (priority: Recommendation["priority"]) => {
-    if (priority === 3) {
+    if (priority === 1) {
       return {
         label: "High",
         className: "bg-red-500/10 text-red-400 border-red-500/30",
@@ -166,62 +152,70 @@ export default async function DashboardPage() {
           AI Recommendations
         </h2>
 
-        {/* Recommendations Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          {/* TODO: replace with real getRecommendations() call once B6/B8 are done — see F12B */}
-          {fakeRecommendations.map((rec) => {
-            const badge = getPriorityDetails(rec.priority);
-            return (
-              <div
-                key={rec.conceptId}
-                className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col justify-between gap-5 transition-all duration-300 hover:border-purple-brand/50 shadow-[0_0_15px_rgba(145,0,141,0.05)] hover:shadow-[0_0_20px_rgba(145,0,141,0.2)] group"
-              >
-                <div className="space-y-3">
-                  {/* Top Badge Info */}
-                  <div className="flex items-center justify-between gap-2 flex-wrap">
-                    <span
-                      className={`px-2.5 py-0.5 text-xs font-medium rounded-md border capitalize ${badge.className}`}
-                    >
-                      {badge.label} Priority
-                    </span>
-                    <span className="text-xs text-zinc-500 font-medium">
-                      Difficulty:{" "}
-                      <span className="text-teal-brand font-semibold">
-                        {rec.difficulty}/5
+        {/* ৪. রেকমেন্ডেশন খালি থাকলে ফ্রেণ্ডলি এম্পটি স্টেট শো করা */}
+        {recommendations.length === 0 ? (
+          <div className="p-10 bg-zinc-900 border border-zinc-800/80 rounded-2xl text-center shadow-sm flex flex-col items-center justify-center space-y-2">
+            <p className="text-zinc-300 font-medium text-base">
+              No recommendations available yet
+            </p>
+            <p className="text-zinc-500 text-sm max-w-md">
+              Complete your first concept to unlock AI recommendations!
+            </p>
+          </div>
+        ) : (
+          /* রেকমেন্ডেশন গ্রিড (UI লেআউট অপরিবর্তিত রাখা হয়েছে) */
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {recommendations.map((rec) => {
+              const badge = getPriorityDetails(rec.priority);
+              return (
+                <div
+                  key={rec.conceptId}
+                  className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col justify-between gap-5 transition-all duration-300 hover:border-purple-brand/50 shadow-[0_0_15px_rgba(145,0,141,0.05)] hover:shadow-[0_0_20px_rgba(145,0,141,0.2)] group"
+                >
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between gap-2 flex-wrap">
+                      <span
+                        className={`px-2.5 py-0.5 text-xs font-medium rounded-md border capitalize ${badge.className}`}
+                      >
+                        {badge.label} Priority
                       </span>
-                    </span>
-                  </div>
-
-                  {/* Concept Title, Topic Context & Reason */}
-                  <div className="space-y-1.5">
-                    <div className="text-xs text-purple-brand font-medium tracking-wide uppercase">
-                      {rec.topicName}
+                      <span className="text-xs text-zinc-500 font-medium">
+                        Difficulty:{" "}
+                        <span className="text-teal-brand font-semibold">
+                          {rec.difficulty}/5
+                        </span>
+                      </span>
                     </div>
-                    <h3 className="text-lg font-bold text-white group-hover:text-purple-brand transition-colors">
-                      {rec.conceptName}
-                    </h3>
-                    <p className="text-sm text-zinc-400 leading-relaxed">
-                      <span className="text-zinc-300 font-medium">
-                        Why recommended:
-                      </span>{" "}
-                      {rec.reason}
-                    </p>
+
+                    <div className="space-y-1.5">
+                      <div className="text-xs text-purple-brand font-medium tracking-wide uppercase">
+                        {rec.topicName || "Topic Plan"}
+                      </div>
+                      <h3 className="text-lg font-bold text-white group-hover:text-purple-brand transition-colors">
+                        {rec.conceptName}
+                      </h3>
+                      <p className="text-sm text-zinc-400 leading-relaxed">
+                        <span className="text-zinc-300 font-medium">
+                          Why recommended:
+                        </span>{" "}
+                        {rec.reason}
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-zinc-800/60 flex justify-end">
+                    <Link
+                      href={`/concepts/${rec.conceptId}`}
+                      className="inline-flex items-center gap-1.5 bg-zinc-950 hover:bg-purple-brand text-zinc-300 hover:text-white border border-zinc-800 px-4 py-2 rounded-xl text-xs font-semibold transition-all group-hover:scale-[1.02]"
+                    >
+                      Start Learning <FaChevronRight size={10} />
+                    </Link>
                   </div>
                 </div>
-
-                {/* Action Button */}
-                <div className="pt-4 border-t border-zinc-800/60 flex justify-end">
-                  <Link
-                    href={`/concepts/${rec.conceptId}`}
-                    className="inline-flex items-center gap-1.5 bg-zinc-950 hover:bg-purple-brand text-zinc-300 hover:text-white border border-zinc-800 px-4 py-2 rounded-xl text-xs font-semibold transition-all group-hover:scale-[1.02]"
-                  >
-                    Start Learning <FaChevronRight size={10} />
-                  </Link>
-                </div>
-              </div>
-            );
-          })}
-        </div>
+              );
+            })}
+          </div>
+        )}
       </div>
     </div>
   );

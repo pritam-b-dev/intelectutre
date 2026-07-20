@@ -29,3 +29,10 @@ export async function updateNote(
 export async function getNote(id: string): Promise<Note> {
   return protectedFetch<Note>(`/api/notes/${id}`);
 }
+
+export async function getUserNotes(): Promise<{
+  items: Note[];
+  total: number;
+}> {
+  return protectedFetch<{ items: Note[]; total: number }>("/api/notes");
+}
