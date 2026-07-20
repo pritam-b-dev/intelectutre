@@ -45,6 +45,7 @@ export interface Topic {
   masteredCount: number;
   createdAt: string;
   updatedAt: string;
+  image?: string;
 }
 
 /* -------------------------------------------------------------------------- */

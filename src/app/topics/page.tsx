@@ -4,6 +4,7 @@ import { FaBrain } from "react-icons/fa6";
 
 import { getTopics } from "../../lib/api/topics";
 import { FilterControls } from "./FilterControls";
+import Image from "next/image";
 
 // 🌟 Skeleton loader with light and dark mode styles
 function TopicSkeletonGrid() {
@@ -57,8 +58,17 @@ async function TopicsGrid({
         >
           <div>
             {/* Image placeholder */}
-            <div className="w-full h-32 bg-zinc-100 dark:bg-zinc-800/30 border border-zinc-200 dark:border-zinc-800 rounded-lg mb-4 flex items-center justify-center text-zinc-500 dark:text-zinc-600 text-xs select-none">
-              Image Placeholder
+            <div className="relative w-full h-40 mb-4 overflow-hidden rounded-xl">
+              <Image
+                src={
+                  topic.image ||
+                  `https://picsum.photos/seed/${encodeURIComponent(topic.name)}/600/400`
+                }
+                alt={topic.name}
+                fill
+                sizes="(max-width:768px) 100vw, 33vw"
+                className="object-cover transition-transform duration-300 group-hover:scale-105"
+              />
             </div>
 
             <div className="flex justify-between items-start mb-2">
