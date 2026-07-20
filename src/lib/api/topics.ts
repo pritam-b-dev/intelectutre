@@ -1,6 +1,6 @@
 "use server";
 
-import { protectedFetch, serverMutation } from "../core/server";
+import { protectedFetch, serverFetch, serverMutation } from "../core/server";
 import { Topic } from "@/types";
 
 export async function getTopics(params?: {
@@ -18,7 +18,7 @@ export async function getTopics(params?: {
       ? `?${new URLSearchParams(activeParams).toString()}`
       : "";
 
-  return protectedFetch<{ items: Topic[]; total: number }>(
+  return serverFetch<{ items: Topic[]; total: number }>(
     `/api/topics${queryString}`,
   );
 }
@@ -49,4 +49,11 @@ export async function updateTopic(
   data: Pick<Topic, "name" | "description" | "category">,
 ): Promise<Topic> {
   return serverMutation<Topic>(`/api/topics/${id}`, data, "PATCH");
+}
+export async function deleteTopic(id: string): Promise<{ success: boolean }> {
+  return serverMutation<{ success: boolean }>(
+    `/api/topics/${id}`,
+    {},
+    "DELETE",
+  );
 }

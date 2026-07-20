@@ -25,3 +25,12 @@ export async function updateConceptStatus(
     "PATCH",
   );
 }
+
+export async function createConcept(data: {
+  topicId: string;
+  name: string;
+  description: string;
+  difficulty: number;
+}): Promise<Concept> {
+  return serverMutation<Concept>("/api/concepts", data, "POST");
+}

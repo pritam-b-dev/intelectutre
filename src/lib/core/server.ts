@@ -1,6 +1,6 @@
 "use server";
 
-import { cookies, headers } from "next/headers";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
 const SERVER_URL =
@@ -11,10 +11,7 @@ export async function serverFetch<T>(
   options?: RequestInit,
 ): Promise<T> {
   const res = await fetch(`${SERVER_URL}${path}`, {
-    headers: {
-      "Content-Type": "application/json",
-      ...options?.headers,
-    },
+    headers: { "Content-Type": "application/json", ...options?.headers },
     ...options,
   });
 
@@ -30,22 +27,10 @@ export async function protectedFetch<T>(
   options: RequestInit = {},
 ): Promise<T> {
   const cookieStore = await cookies();
-  const headerStore = await headers();
-
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
+  const cookieHeader = cookieStore.toString();
 
   const requestHeaders = new Headers(options.headers);
-
   requestHeaders.set("Content-Type", "application/json");
-
-  const userAgent = headerStore.get("user-agent");
-  if (userAgent) {
-    requestHeaders.set("User-Agent", userAgent);
-  }
-
   if (cookieHeader) {
     requestHeaders.set("Cookie", cookieHeader);
   }
@@ -59,7 +44,6 @@ export async function protectedFetch<T>(
   if (res.status === 401) {
     redirect("/signin");
   }
-
   if (!res.ok) {
     throw new Error(`Fetch failed with status ${res.status}`);
   }
@@ -70,25 +54,13 @@ export async function protectedFetch<T>(
 export async function serverMutation<T>(
   path: string,
   data: unknown,
-  method: "POST" | "PUT" | "PATCH" | "DELETE" = "POST",
+  method: "POST" | "PATCH" | "PUT" | "DELETE" = "POST",
 ): Promise<T> {
   const cookieStore = await cookies();
-  const headerStore = await headers();
-
-  const cookieHeader = cookieStore
-    .getAll()
-    .map((c) => `${c.name}=${c.value}`)
-    .join("; ");
+  const cookieHeader = cookieStore.toString();
 
   const requestHeaders = new Headers();
-
   requestHeaders.set("Content-Type", "application/json");
-
-  const userAgent = headerStore.get("user-agent");
-  if (userAgent) {
-    requestHeaders.set("User-Agent", userAgent);
-  }
-
   if (cookieHeader) {
     requestHeaders.set("Cookie", cookieHeader);
   }
@@ -97,13 +69,11 @@ export async function serverMutation<T>(
     method,
     headers: requestHeaders,
     body: JSON.stringify(data),
-    cache: "no-store",
   });
 
   if (res.status === 401) {
     redirect("/signin");
   }
-
   if (!res.ok) {
     throw new Error(`Mutation failed with status ${res.status}`);
   }

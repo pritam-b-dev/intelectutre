@@ -1,222 +1,87 @@
 import Link from "next/link";
-import {
-  FaBookOpen,
-  FaGraduationCap,
-  FaClock,
-  FaChevronRight,
-} from "react-icons/fa6";
+import { getUserSession } from "@/lib/core/session";
 import { getMyTopics } from "@/lib/api/topics";
-import { getRecommendations } from "@/lib/api/recommendations"; // 🌟 রিয়েল API ফাংশন ইম্পোর্ট
-import { Topic, Recommendation } from "@/types";
+import { getRecommendations } from "@/lib/api/recommendations";
+import { redirect } from "next/navigation";
 
 export default async function DashboardPage() {
-  let topics: Topic[] = [];
-  let recommendations: Recommendation[] = [];
+  const session = await getUserSession();
+  if (!session?.user) redirect("/signin?redirect=/dashboard");
 
-  // ১. এপিআই থেকে টপিকস এবং রিয়েল রেকমেন্ডেশন ডাটা ফেচ করা
-  try {
-    const [topicsResponse, recsResponse] = await Promise.all([
-      getMyTopics(),
-      getRecommendations(),
-    ]);
+  const [topicsData, recData] = await Promise.all([
+    getMyTopics().catch(() => ({ items: [], total: 0 })),
+    getRecommendations().catch(() => ({ items: [], total: 0 })),
+  ]);
 
-    // টপিক রেসপন্স হ্যান্ডলিং
-    if (topicsResponse) {
-      if (Array.isArray(topicsResponse)) {
-        topics = topicsResponse as Topic[];
-      } else if (
-        typeof topicsResponse === "object" &&
-        "items" in topicsResponse
-      ) {
-        topics = (topicsResponse as { items: Topic[] }).items || [];
-      }
-    }
-
-    // রেকমেন্ডেশন রেসপন্স হ্যান্ডলিং (F12B: রিয়েল কল ও ক্যাচিং)
-    if (recsResponse && "items" in recsResponse) {
-      recommendations = recsResponse.items || [];
-    }
-  } catch (error) {
-    console.error("Failed to fetch dashboard data:", error);
-  }
-
-  // ২. স্ট্যাটাস ক্যালকুলেশন
-  const topicsStarted = topics.length;
-  const conceptsMastered = topics.reduce(
-    (acc, topic) => acc + (topic.masteredCount || 0),
-    0,
-  );
-
-  let lastStudiedDate = "No activity yet";
-  if (topics.length > 0) {
-    const latestTopic = [...topics].sort(
-      (a, b) =>
-        new Date(b.updatedAt || 0).getTime() -
-        new Date(a.updatedAt || 0).getTime(),
-    )[0];
-
-    if (latestTopic?.updatedAt) {
-      lastStudiedDate = new Date(latestTopic.updatedAt).toLocaleDateString(
-        "en-US",
-        {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        },
-      );
-    }
-  }
-
-  // ৩. B6 লজিক অনুযায়ী (1 = High, 2 = Medium, 3 = Low) ব্যাজ ও স্টাইল ডিটেইলস
-  const getPriorityDetails = (priority: Recommendation["priority"]) => {
-    if (priority === 1) {
-      return {
-        label: "High",
-        className: "bg-red-500/10 text-red-400 border-red-500/30",
-      };
-    }
-    if (priority === 2) {
-      return {
-        label: "Medium",
-        className: "bg-amber-500/10 text-amber-400 border-amber-500/30",
-      };
-    }
-    return {
-      label: "Low",
-      className: "bg-blue-500/10 text-blue-400 border-blue-500/30",
-    };
-  };
+  const topics = topicsData.items;
+  const totalConcepts = topics.reduce((s, t) => s + (t.conceptCount || 0), 0);
+  const totalMastered = topics.reduce((s, t) => s + (t.masteredCount || 0), 0);
 
   return (
-    <div className="max-w-6xl mx-auto px-4 py-8 space-y-10">
-      <div>
-        <h1 className="text-3xl font-bold text-white tracking-tight">
-          Welcome Back!
-        </h1>
-        <p className="text-zinc-400 text-sm mt-1">
-          Here is a summary of your learning progress and AI recommendations.
-        </p>
-      </div>
+    <div className="container mx-auto p-6 text-zinc-100">
+      <h1 className="text-2xl font-bold mb-6">
+        Welcome back, {session.user.name}
+      </h1>
 
-      {/* --- Stats Cards Section --- */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        {/* Card 1: Topics Started */}
-        <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center gap-4 shadow-sm">
-          <div className="p-3 bg-blue-500/10 text-blue-400 rounded-xl border border-blue-500/20">
-            <FaBookOpen size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              Topics Started
-            </p>
-            <p className="text-2xl font-bold text-white mt-0.5">
-              {topicsStarted}
-            </p>
-          </div>
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
+        <div className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/40">
+          <p className="text-xs text-zinc-500">Topics</p>
+          <p className="text-2xl font-bold">{topics.length}</p>
         </div>
-
-        {/* Card 2: Concepts Mastered */}
-        <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center gap-4 shadow-sm">
-          <div className="p-3 bg-teal-brand/10 text-teal-brand rounded-xl border border-teal-brand/20">
-            <FaGraduationCap size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              Concepts Mastered
-            </p>
-            <p className="text-2xl font-bold text-white mt-0.5">
-              {conceptsMastered}
-            </p>
-          </div>
+        <div className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/40">
+          <p className="text-xs text-zinc-500">Total Concepts</p>
+          <p className="text-2xl font-bold">{totalConcepts}</p>
         </div>
-
-        {/* Card 3: Last Studied */}
-        <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex items-center gap-4 shadow-sm">
-          <div className="p-3 bg-gold-brand/10 text-gold-brand rounded-xl border border-gold-brand/20">
-            <FaClock size={22} />
-          </div>
-          <div>
-            <p className="text-xs font-medium text-zinc-500 uppercase tracking-wider">
-              Last Studied
-            </p>
-            <p className="text-xl font-bold text-white mt-0.5 max-w-45 truncate">
-              {lastStudiedDate}
-            </p>
-          </div>
+        <div className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/40">
+          <p className="text-xs text-zinc-500">Mastered</p>
+          <p className="text-2xl font-bold text-purple-400">{totalMastered}</p>
         </div>
       </div>
 
-      {/* --- AI Recommendations Section --- */}
-      <div className="space-y-4">
-        <h2 className="text-xl font-bold text-white tracking-tight">
-          AI Recommendations
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-lg font-semibold flex items-center gap-2">
+          🧠 AI Recommendations
         </h2>
-
-        {/* ৪. রেকমেন্ডেশন খালি থাকলে ফ্রেণ্ডলি এম্পটি স্টেট শো করা */}
-        {recommendations.length === 0 ? (
-          <div className="p-10 bg-zinc-900 border border-zinc-800/80 rounded-2xl text-center shadow-sm flex flex-col items-center justify-center space-y-2">
-            <p className="text-zinc-300 font-medium text-base">
-              No recommendations available yet
-            </p>
-            <p className="text-zinc-500 text-sm max-w-md">
-              Complete your first concept to unlock AI recommendations!
-            </p>
-          </div>
-        ) : (
-          /* রেকমেন্ডেশন গ্রিড (UI লেআউট অপরিবর্তিত রাখা হয়েছে) */
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {recommendations.map((rec) => {
-              const badge = getPriorityDetails(rec.priority);
-              return (
-                <div
-                  key={rec.conceptId}
-                  className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl flex flex-col justify-between gap-5 transition-all duration-300 hover:border-purple-brand/50 shadow-[0_0_15px_rgba(145,0,141,0.05)] hover:shadow-[0_0_20px_rgba(145,0,141,0.2)] group"
-                >
-                  <div className="space-y-3">
-                    <div className="flex items-center justify-between gap-2 flex-wrap">
-                      <span
-                        className={`px-2.5 py-0.5 text-xs font-medium rounded-md border capitalize ${badge.className}`}
-                      >
-                        {badge.label} Priority
-                      </span>
-                      <span className="text-xs text-zinc-500 font-medium">
-                        Difficulty:{" "}
-                        <span className="text-teal-brand font-semibold">
-                          {rec.difficulty}/5
-                        </span>
-                      </span>
-                    </div>
-
-                    <div className="space-y-1.5">
-                      <div className="text-xs text-purple-brand font-medium tracking-wide uppercase">
-                        {rec.topicName || "Topic Plan"}
-                      </div>
-                      <h3 className="text-lg font-bold text-white group-hover:text-purple-brand transition-colors">
-                        {rec.conceptName}
-                      </h3>
-                      <p className="text-sm text-zinc-400 leading-relaxed">
-                        <span className="text-zinc-300 font-medium">
-                          Why recommended:
-                        </span>{" "}
-                        {rec.reason}
-                      </p>
-                    </div>
-                  </div>
-
-                  <div className="pt-4 border-t border-zinc-800/60 flex justify-end">
-                    <Link
-                      href={`/concepts/${rec.conceptId}`}
-                      className="inline-flex items-center gap-1.5 bg-zinc-950 hover:bg-purple-brand text-zinc-300 hover:text-white border border-zinc-800 px-4 py-2 rounded-xl text-xs font-semibold transition-all group-hover:scale-[1.02]"
-                    >
-                      Start Learning <FaChevronRight size={10} />
-                    </Link>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
+        <div className="flex gap-3">
+          <Link
+            href="/topics/add"
+            className="text-xs bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg"
+          >
+            + Add Topic
+          </Link>
+          <Link
+            href="/topics/manage"
+            className="text-xs border border-zinc-700 px-3 py-1.5 rounded-lg"
+          >
+            Manage Topics
+          </Link>
+        </div>
       </div>
+
+      {recData.items.length === 0 ? (
+        <p className="text-zinc-500 text-sm border border-dashed border-zinc-800 rounded-xl p-6 text-center">
+          Add a topic and a few concepts to unlock AI recommendations.
+        </p>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {recData.items.map((r) => (
+            <div
+              key={r.conceptId}
+              className="border border-purple-500/30 bg-purple-500/5 rounded-xl p-4"
+            >
+              <p className="text-xs text-purple-400 mb-1">{r.topicName}</p>
+              <h3 className="font-semibold mb-1">{r.conceptName}</h3>
+              <p className="text-xs text-zinc-400 mb-3">{r.reason}</p>
+              <Link
+                href={`/concepts/${r.conceptId}`}
+                className="text-xs bg-purple-600 hover:bg-purple-700 px-3 py-1.5 rounded-lg inline-block"
+              >
+                Start Learning
+              </Link>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

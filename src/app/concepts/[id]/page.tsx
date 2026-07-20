@@ -1,32 +1,34 @@
+import { notFound } from "next/navigation";
 import { getConcept } from "@/lib/api/concepts";
-import { getNotesByConcept } from "@/lib/api/notes";
-import { Concept } from "@/types"; //[cite: 3]
-import ConceptDetailClient from "./ConceptDetailClient";
+import { getHistory } from "@/lib/api/chat";
+import ChatBox from "./ChatBox";
 
-interface PageProps {
+export default async function ConceptDetailPage({
+  params,
+}: {
   params: Promise<{ id: string }>;
-}
+}) {
+  const { id } = await params;
+  const concept = await getConcept(id).catch(() => null);
+  if (!concept) notFound();
 
-export default async function ConceptDetailPage({ params }: PageProps) {
-  const resolvedParams = await params;
-  const conceptId = resolvedParams.id;
-
-  // ১. সমান্তরালভাবে (Parallel) কনসেপ্ট এবং নোটস ফেচ করা
-  const [conceptResponse, notesResponse] = await Promise.all([
-    getConcept(conceptId),
-    getNotesByConcept(conceptId),
-  ]);
-
-  // 🌟 'any' এর বদলে টাইপ-সেফ অবজেক্ট স্ট্রাকচারে কাস্ট করা হলো
-  const concept =
-    (conceptResponse as unknown as { data?: Concept }).data || conceptResponse;
-
-  // নোটস লিস্ট এবং টোটাল কাউন্ট সেফলি হ্যান্ডেল করা
-  const notes = notesResponse?.items || [];
+  const history = await getHistory(id).catch(() => []);
 
   return (
-    <div className="max-w-5xl mx-auto px-4 py-8">
-      <ConceptDetailClient concept={concept} initialNotes={notes} />
+    <div className="container mx-auto p-6 grid grid-cols-1 lg:grid-cols-2 gap-6 text-zinc-100">
+      <div>
+        <span className="text-xs text-purple-400">
+          Difficulty {concept.difficulty}/5
+        </span>
+        <h1 className="text-2xl font-bold mb-2">{concept.name}</h1>
+        <p className="text-zinc-400">{concept.description}</p>
+      </div>
+      <div className="border border-purple-500/30 rounded-xl p-4 bg-zinc-900/40">
+        <h2 className="font-semibold mb-3 flex items-center gap-2">
+          🧠 Ask AI about this
+        </h2>
+        <ChatBox conceptId={id} initialHistory={history} />
+      </div>
     </div>
   );
 }
