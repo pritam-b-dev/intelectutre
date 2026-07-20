@@ -4,13 +4,14 @@ import * as React from "react";
 import Link from "next/link";
 import { authClient } from "@/lib/auth-client";
 import { toast } from "react-hot-toast";
-import { FaBrain, FaSpinner } from "react-icons/fa6";
+import { FaBrain, FaGoogle, FaSpinner } from "react-icons/fa6";
 
 export default function SignUpPage() {
   const [name, setName] = React.useState("");
   const [email, setEmail] = React.useState("");
   const [password, setPassword] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isGoogleLoading, setIsGoogleLoading] = React.useState(false);
 
   const handleEmailSignUp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,6 +43,20 @@ export default function SignUpPage() {
     });
   };
 
+  const handleGoogleSignUp = async () => {
+    setIsGoogleLoading(true);
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: `${window.location.origin}/callback`,
+      fetchOptions: {
+        onError: (ctx) => {
+          toast.error(ctx.error.message || "Google sign up failed");
+          setIsGoogleLoading(false);
+        },
+      },
+    });
+  };
+
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center mx-auto px-4">
       <div className="mx-auto flex w-full flex-col justify-center space-y-6 sm:w-[350px] border border-zinc-800 p-6 rounded-xl bg-zinc-900/50 shadow-xl backdrop-blur-sm">
@@ -68,7 +83,7 @@ export default function SignUpPage() {
               placeholder="John Doe"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
               required
               className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
@@ -87,7 +102,7 @@ export default function SignUpPage() {
               placeholder="name@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
               required
               className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
@@ -106,7 +121,7 @@ export default function SignUpPage() {
               placeholder="••••••••"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              disabled={isLoading}
+              disabled={isLoading || isGoogleLoading}
               required
               className="w-full px-3 py-2 rounded-lg border border-zinc-800 bg-zinc-950 text-sm placeholder:text-zinc-500 focus:outline-none focus:ring-2 focus:ring-purple-500/50 focus:border-purple-500 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             />
@@ -115,7 +130,7 @@ export default function SignUpPage() {
           <button
             type="submit"
             className="w-full flex items-center justify-center bg-purple-600 hover:bg-purple-700 text-white font-medium text-sm py-2 rounded-lg gap-2 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            disabled={isLoading}
+            disabled={isLoading || isGoogleLoading}
           >
             {isLoading ? (
               <FaSpinner className="h-4 w-4 animate-spin" />
@@ -124,6 +139,29 @@ export default function SignUpPage() {
             )}
           </button>
         </form>
+
+        {/* Divider */}
+        <div className="relative flex items-center justify-center">
+          <span className="absolute w-full border-t border-zinc-800" />
+          <span className="relative bg-zinc-900 px-2 text-[10px] text-zinc-400 uppercase tracking-wider">
+            Or continue with
+          </span>
+        </div>
+
+        {/* Social SignUp / Google Button */}
+        <button
+          type="button"
+          className="w-full flex items-center justify-center gap-2 border border-zinc-800 bg-transparent hover:bg-zinc-800 text-zinc-200 text-sm font-medium py-2 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          onClick={handleGoogleSignUp}
+          disabled={isLoading || isGoogleLoading}
+        >
+          {isGoogleLoading ? (
+            <FaSpinner className="h-4 w-4 animate-spin" />
+          ) : (
+            <FaGoogle className="h-4 w-4 text-red-500" />
+          )}
+          Sign Up with Google
+        </button>
 
         {/* Footer Link */}
         <p className="px-8 text-center text-sm text-zinc-400">
