@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { Concept, Note } from "@/types"; //[cite: 3]
+import { Concept, Note } from "@/types";
 import { createNote } from "@/lib/api/notes";
 import { FaBrain, FaPlus, FaPen, FaTrashCan, FaXmark } from "react-icons/fa6";
+import AIChatSidebar from "../../../components/ai/AIChatSidebar";
 
 interface ConceptDetailClientProps {
   concept: Concept;
@@ -22,7 +23,9 @@ export default function ConceptDetailClient({
   const [content, setContent] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // স্ট্যাটাস অনুযায়ী ব্যাজের কালার নির্ধারণ
+  // State for AI Sidebar visibility
+  const [isAiChatOpen, setIsAiChatOpen] = useState(false);
+
   const getStatusBadge = (status: Concept["status"]) => {
     switch (status) {
       case "mastered":
@@ -46,7 +49,6 @@ export default function ConceptDetailClient({
     }
   };
 
-  // ইনলাইন নোট সাবমিট হ্যান্ডলার
   const handleAddNote = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !content.trim()) return;
@@ -59,11 +61,9 @@ export default function ConceptDetailClient({
         content,
       });
 
-      // 🌟 'any' এর বদলে টাইপ-সেফ অবজেক্ট স্ট্রাকচারে কাস্ট করা হলো
       const newNote = (response as unknown as { data?: Note }).data || response;
       setNotes([newNote, ...notes]);
 
-      // ফর্ম রিসেট
       setTitle("");
       setContent("");
       setIsFormOpen(false);
@@ -77,7 +77,7 @@ export default function ConceptDetailClient({
 
   return (
     <div className="space-y-8">
-      {/* --- Concept Header --- */}
+      {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-6 bg-zinc-900 border border-zinc-800 rounded-2xl shadow-sm">
         <div className="space-y-2">
           <div className="flex items-center gap-3 flex-wrap">
@@ -94,16 +94,16 @@ export default function ConceptDetailClient({
           </p>
         </div>
 
-        {/* 🧠 Ask AI Button Placeholder */}
+        {/* 🧠 Ask AI Button - Enabled */}
         <button
-          disabled
-          className="flex items-center justify-center gap-2 bg-[#91008D] opacity-75 cursor-not-allowed text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-[#91008D]/20"
+          onClick={() => setIsAiChatOpen(true)}
+          className="flex items-center justify-center gap-2 bg-[#91008D] hover:bg-[#a600a2] text-white px-5 py-2.5 rounded-xl font-medium transition-all shadow-lg shadow-[#91008D]/20 active:scale-95"
         >
           <FaBrain className="animate-pulse text-lg" /> Ask AI Tutor
         </button>
       </div>
 
-      {/* --- Description Section --- */}
+      {/* Concept Description */}
       <div className="p-6 bg-zinc-900 border border-zinc-800 rounded-2xl">
         <h2 className="text-lg font-semibold text-zinc-200 mb-3">
           Concept Overview
@@ -113,7 +113,7 @@ export default function ConceptDetailClient({
         </p>
       </div>
 
-      {/* --- Notes Section --- */}
+      {/* Notes Section */}
       <div className="space-y-4">
         <div className="flex justify-between items-center">
           <h2 className="text-xl font-bold text-white">My Study Notes</h2>
@@ -127,7 +127,6 @@ export default function ConceptDetailClient({
           )}
         </div>
 
-        {/* --- Inline Add Note Form --- */}
         {isFormOpen && (
           <form
             onSubmit={handleAddNote}
@@ -188,7 +187,6 @@ export default function ConceptDetailClient({
           </form>
         )}
 
-        {/* --- Notes List --- */}
         {notes.length === 0 ? (
           <div className="text-center py-12 border-2 border-dashed border-zinc-800 rounded-2xl">
             <p className="text-zinc-500">
@@ -217,7 +215,6 @@ export default function ConceptDetailClient({
                   </p>
                 </div>
 
-                {/* Actions Buttons */}
                 <div className="flex gap-2 self-end sm:self-start">
                   <button className="p-2 text-zinc-400 hover:text-[#00E0BA] bg-zinc-950 border border-zinc-800 rounded-xl transition">
                     <FaPen size={14} />
@@ -231,6 +228,14 @@ export default function ConceptDetailClient({
           </div>
         )}
       </div>
+
+      {/* Integrated AI Chat Drawer */}
+      <AIChatSidebar
+        conceptId={concept._id}
+        isOpen={isAiChatOpen}
+        onClose={() => setIsAiChatOpen(false)}
+        onOpen={() => setIsAiChatOpen(true)}
+      />
     </div>
   );
 }
