@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import Link from "next/link";
 import { getUserSession } from "@/lib/core/session";
 import { getMyTopics } from "@/lib/api/topics";
