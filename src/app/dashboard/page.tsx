@@ -3,6 +3,8 @@ import { getUserSession } from "@/lib/core/session";
 import { getMyTopics } from "@/lib/api/topics";
 import { getRecommendations } from "@/lib/api/recommendations";
 import { redirect } from "next/navigation";
+import { getConceptsByTopic } from "@/lib/api/concepts";
+import ProgressChart from "../../components/dashboard/ProgressChart";
 
 export default async function DashboardPage() {
   const session = await getUserSession();
@@ -14,6 +16,27 @@ export default async function DashboardPage() {
   ]);
 
   const topics = topicsData.items;
+
+  const allConcepts = (
+    await Promise.all(
+      topics.map((t) => getConceptsByTopic(t._id).catch(() => ({ items: [] }))),
+    )
+  ).flatMap((r) => r.items);
+
+  const chartData = [
+    {
+      name: "Mastered",
+      value: allConcepts.filter((c) => c.status === "mastered").length,
+    },
+    {
+      name: "Learning",
+      value: allConcepts.filter((c) => c.status === "learning").length,
+    },
+    {
+      name: "Not Started",
+      value: allConcepts.filter((c) => c.status === "not_started").length,
+    },
+  ];
   const totalConcepts = topics.reduce((s, t) => s + (t.conceptCount || 0), 0);
   const totalMastered = topics.reduce((s, t) => s + (t.masteredCount || 0), 0);
 
@@ -36,6 +59,22 @@ export default async function DashboardPage() {
           <p className="text-xs text-zinc-500">Mastered</p>
           <p className="text-2xl font-bold text-purple-400">{totalMastered}</p>
         </div>
+      </div>
+      <Link
+        href="/chat"
+        className="flex items-center justify-between border border-purple-500/30 bg-purple-500/5 rounded-xl p-5 mb-10 hover:bg-purple-500/10"
+      >
+        <div>
+          <p className="font-semibold">🧠 Talk to your AI Tutor</p>
+          <p className="text-xs text-zinc-500">
+            Ask questions about any concept you are learning
+          </p>
+        </div>
+        <span className="text-purple-400 text-sm">Open Chat →</span>
+      </Link>
+      <div className="border border-zinc-800 rounded-xl p-5 bg-zinc-900/40 mb-10">
+        <h2 className="text-lg font-semibold mb-2">Progress Overview</h2>
+        <ProgressChart data={chartData} />
       </div>
 
       <div className="flex items-center justify-between mb-4">

@@ -75,7 +75,8 @@ export async function serverMutation<T>(
     redirect("/signin");
   }
   if (!res.ok) {
-    throw new Error(`Mutation failed with status ${res.status}`);
+    const errorBody = await res.text();
+    throw new Error(`Mutation failed (${res.status}): ${errorBody}`);
   }
 
   return res.json();
