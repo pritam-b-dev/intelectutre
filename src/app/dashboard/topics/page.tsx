@@ -1,15 +1,11 @@
 import { getMyTopics } from "@/lib/api/topics";
-import { Topic } from "@/types"; // আপনার প্রজেক্টের মেইন টাইপ ইমপোর্ট করুন
+import { Topic } from "@/types";
 import Link from "next/link";
 import { FaEye, FaPen, FaTrashCan, FaPlus } from "react-icons/fa6";
 
-interface ConceptItem {
-  status: "mastered" | "learning" | "not_started";
-}
-
 interface TopicWithDetails extends Topic {
   id: string;
-  concepts?: ConceptItem[];
+  concepts?: { status: "mastered" | "learning" | "not_started" }[];
 }
 
 export default async function ManageTopicsPage() {
@@ -19,8 +15,9 @@ export default async function ManageTopicsPage() {
     <div className="max-w-6xl mx-auto px-4 py-8">
       <div className="flex justify-between items-center mb-8">
         <h1 className="text-2xl font-bold text-gray-900">My Learning Topics</h1>
+        {/* এখানে href টি নতুন পেজের সাথে মিলিয়ে দিন */}
         <Link
-          href="/topics/create"
+          href="/topics/new"
           className="flex items-center gap-2 bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition"
         >
           <FaPlus /> New Topic
@@ -53,14 +50,12 @@ export default async function ManageTopicsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
-              {/* ৩. এখানে unknown কাস্টিং ব্যবহার করেছি যা safe এবং lint error দেয় না */}
-              {topics.map((topic: unknown) => {
+              {topics.map((topic: Topic) => {
                 const item = topic as TopicWithDetails;
                 const total = item.concepts?.length || 0;
                 const mastered =
-                  item.concepts?.filter(
-                    (c: ConceptItem) => c.status === "mastered",
-                  ).length || 0;
+                  item.concepts?.filter((c) => c.status === "mastered")
+                    .length || 0;
                 const progress =
                   total > 0 ? Math.round((mastered / total) * 100) : 0;
 
