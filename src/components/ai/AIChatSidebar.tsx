@@ -50,7 +50,7 @@ export default function AIChatSidebar({
     }
   }, [messages, isTyping, isOpen]);
 
-  // 🌟 F16B: রিয়েল স্ট্রিম মেসেজ হ্যান্ডলার
+  // 🌟 F16B + B10: রিয়েল স্ট্রিম ও সেভ মেসেজ হ্যান্ডলার
   const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() || isTyping) return;
@@ -86,7 +86,7 @@ export default function AIChatSidebar({
     let fullAssistantText = "";
 
     try {
-      // Step 1: POST to /api/chat/stream with {conceptId, message}
+      // Step 1: POST to /api/chat/stream
       const response = await fetch("/api/chat/stream", {
         method: "POST",
         headers: {
@@ -120,7 +120,7 @@ export default function AIChatSidebar({
             const trimmed = line.trim();
             if (!trimmed || !trimmed.startsWith("data:")) continue;
 
-            const dataContent = trimmed.slice(5).trim(); // "data:" অংশ বাদ দেওয়া
+            const dataContent = trimmed.slice(5).trim();
 
             if (dataContent === "[DONE]") {
               break;
@@ -147,7 +147,7 @@ export default function AIChatSidebar({
         }
       }
 
-      // Step 4: On stream end, POST /api/chat/save-response with the full assistant message text
+      // Step 4: On stream end, POST /api/chat/save-response (B10 Endpoint)
       if (fullAssistantText) {
         await fetch("/api/chat/save-response", {
           method: "POST",
@@ -156,14 +156,12 @@ export default function AIChatSidebar({
           },
           body: JSON.stringify({
             conceptId,
-            message: fullAssistantText,
-            role: "assistant",
+            assistantMessage: fullAssistantText,
           }),
         });
       }
     } catch (error) {
       console.error("❌ Error during chat streaming:", error);
-      // এরর হলে ইউজারকে মেসেজ দেখানো
       setMessages((prev) =>
         prev.map((msg) =>
           msg._id === assistantMsgId
