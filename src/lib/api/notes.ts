@@ -25,3 +25,7 @@ export async function updateNote(
 ): Promise<Note> {
   return serverMutation<Note>(`/api/notes/${id}`, data, "PUT");
 }
+
+export async function getNote(id: string): Promise<Note> {
+  return protectedFetch<Note>(`/api/notes/${id}`);
+}
