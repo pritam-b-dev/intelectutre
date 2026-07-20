@@ -12,7 +12,9 @@ export async function getNotesByConcept(
 }
 
 export async function createNote(
-  data: Pick<Note, "conceptId" | "title" | "content">,
+  data: Pick<Note, "conceptId" | "title" | "content"> & {
+    status?: Note["status"];
+  },
 ): Promise<Note> {
   return serverMutation<Note>("/api/notes", data, "POST");
 }
