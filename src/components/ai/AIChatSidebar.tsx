@@ -7,8 +7,6 @@ import {
   FaXmark,
   FaRobot,
   FaUser,
-  FaComments,
-  FaChevronRight,
 } from "react-icons/fa6";
 import { ChatMessage } from "@/types";
 
@@ -24,7 +22,7 @@ export default function AIChatSidebar({
   // ১. সাইডবার খোলা নাকি বন্ধ তা ট্র্যাক করার স্টেট
   const [isOpen, setIsOpen] = useState(false);
 
-  // ২. লোকাল মেসেজ লিস্ট স্টেট (F4-এর ChatMessage টাইপ ব্যবহার করে)
+  // ২. লোকাল মেসেজ লিস্ট স্টেট
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
       _id: "init-1",
@@ -52,42 +50,135 @@ export default function AIChatSidebar({
     }
   }, [messages, isTyping, isOpen]);
 
-  // মেসেজ পাঠানোর হ্যান্ডলার (UI Fake Reply)
-  const handleSend = (e?: React.FormEvent) => {
+  // 🌟 F16B: রিয়েল স্ট্রিম মেসেজ হ্যান্ডলার
+  const handleSend = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
     if (!input.trim() || isTyping) return;
 
     const userMsgText = input.trim();
+    const timestamp = new Date().toISOString();
 
-    // নতুন ইউজার মেসেজ তৈরি
+    // ১. ইউজার মেসেজ তৈরি ও স্টেটে অ্যাড
     const userMsg: ChatMessage = {
       _id: `user-${Date.now()}`,
       userId,
       conceptId,
       role: "user",
       message: userMsgText,
+      timestamp,
+    };
+
+    // ২. স্ট্রিম থেকে আসা লাইভ রেসপন্সের জন্য খালি Assistant মেসেজ প্লেসহোল্ডার
+    const assistantMsgId = `assistant-${Date.now()}`;
+    const initialAssistantMsg: ChatMessage = {
+      _id: assistantMsgId,
+      userId,
+      conceptId,
+      role: "assistant",
+      message: "",
       timestamp: new Date().toISOString(),
     };
 
-    // স্টেট আপডেট ও ইনপুট ক্লিয়ার
-    setMessages((prev) => [...prev, userMsg]);
+    setMessages((prev) => [...prev, userMsg, initialAssistantMsg]);
     setInput("");
     setIsTyping(true);
 
-    // TODO: replace fake reply with real streaming call — see F16B
-    setTimeout(() => {
-      const assistantMsg: ChatMessage = {
-        _id: `assistant-${Date.now()}`,
-        userId,
-        conceptId,
-        role: "assistant",
-        message: `This is a placeholder reply for: "${userMsgText}". Real AI streaming will be connected in step F16B!`,
-        timestamp: new Date().toISOString(),
-      };
+    let fullAssistantText = "";
 
-      setMessages((prev) => [...prev, assistantMsg]);
+    try {
+      // Step 1: POST to /api/chat/stream with {conceptId, message}
+      const response = await fetch("/api/chat/stream", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ conceptId, message: userMsgText }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Stream request failed with status ${response.status}`);
+      }
+
+      // Step 2: Open ReadableStream connection
+      const reader = response.body?.getReader();
+      const decoder = new TextDecoder("utf-8");
+
+      if (reader) {
+        let buffer = "";
+
+        while (true) {
+          const { value, done } = await reader.read();
+          if (done) break;
+
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split("\n");
+
+          // অসম্পূর্ণ লাইন পরের চাঙ্কের জন্য বাফারে রেখে বাকি লাইনগুলো প্রসেস করি
+          buffer = lines.pop() || "";
+
+          for (const line of lines) {
+            const trimmed = line.trim();
+            if (!trimmed || !trimmed.startsWith("data:")) continue;
+
+            const dataContent = trimmed.slice(5).trim(); // "data:" অংশ বাদ দেওয়া
+
+            if (dataContent === "[DONE]") {
+              break;
+            }
+
+            try {
+              const parsed = JSON.parse(dataContent);
+              if (parsed.text) {
+                fullAssistantText += parsed.text;
+
+                // Step 3: Append chunks in real-time (Typewriter effect)
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg._id === assistantMsgId
+                      ? { ...msg, message: fullAssistantText }
+                      : msg,
+                  ),
+                );
+              }
+            } catch (jsonErr) {
+              console.error("Error parsing stream chunk:", jsonErr);
+            }
+          }
+        }
+      }
+
+      // Step 4: On stream end, POST /api/chat/save-response with the full assistant message text
+      if (fullAssistantText) {
+        await fetch("/api/chat/save-response", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            conceptId,
+            message: fullAssistantText,
+            role: "assistant",
+          }),
+        });
+      }
+    } catch (error) {
+      console.error("❌ Error during chat streaming:", error);
+      // এরর হলে ইউজারকে মেসেজ দেখানো
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg._id === assistantMsgId
+            ? {
+                ...msg,
+                message:
+                  fullAssistantText ||
+                  "Sorry, an error occurred while generating the response. Please try again.",
+              }
+            : msg,
+        ),
+      );
+    } finally {
       setIsTyping(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -157,7 +248,7 @@ export default function AIChatSidebar({
 
             return (
               <div
-                key={msg._id || `msg-${index}`} // 👈 Math.random() সরিয়ে index ব্যবহার করা হয়েছে
+                key={msg._id || `msg-${index}`}
                 className={`flex gap-3 max-w-[85%] ${
                   isUser ? "ml-auto flex-row-reverse" : "mr-auto flex-row"
                 }`}
@@ -182,7 +273,9 @@ export default function AIChatSidebar({
                         : "bg-purple-950/40 border border-purple-900/40 text-purple-100 rounded-tl-xs"
                     }`}
                   >
-                    {msg.message}
+                    {msg.message || (
+                      <span className="italic opacity-60">Thinking...</span>
+                    )}
                   </div>
                   <p
                     className={`text-[10px] text-zinc-500 px-1 ${
