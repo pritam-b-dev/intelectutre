@@ -6,6 +6,7 @@ import { Concept, Note } from "@/types";
 import { createNote } from "@/lib/api/notes";
 import { FaBrain, FaPlus, FaPen, FaTrashCan, FaXmark } from "react-icons/fa6";
 import AIChatSidebar from "../../../components/ai/AIChatSidebar";
+import { deleteNote } from "@/lib/api/notes";
 
 interface ConceptDetailClientProps {
   concept: Concept;
@@ -221,15 +222,25 @@ export default function ConceptDetailClient({
                     {note.content}
                   </p>
                 </div>
-
                 <div className="flex gap-2 self-end sm:self-start">
                   <button
+                    onClick={() => router.push(`/notes/${note._id}/edit`)}
                     className="p-2 text-zinc-400 hover:text-purple-600 dark:hover:text-purple-400 bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl transition-colors"
                     title="Edit Note"
                   >
                     <FaPen size={14} />
                   </button>
                   <button
+                    onClick={async () => {
+                      const prev = notes;
+                      setNotes(notes.filter((n) => n._id !== note._id));
+                      try {
+                        await deleteNote(note._id);
+                      } catch {
+                        setNotes(prev);
+                        alert("Failed to delete note");
+                      }
+                    }}
                     className="p-2 text-zinc-400 hover:text-red-600 dark:hover:text-red-400 bg-zinc-100 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-xl transition-colors"
                     title="Delete Note"
                   >

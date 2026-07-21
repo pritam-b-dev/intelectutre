@@ -68,6 +68,12 @@ export default function ManageTopicsClient({
                 >
                   View
                 </Link>
+                <Link
+                  href={`/topics/${t._id}/edit`}
+                  className="text-xs border border-zinc-300 dark:border-zinc-700 bg-zinc-100 dark:bg-zinc-800 hover:bg-purple-600 dark:hover:bg-purple-600 text-zinc-800 dark:text-zinc-200 hover:text-white px-3.5 py-1.5 rounded-lg font-medium"
+                >
+                  Edit
+                </Link>
                 {confirmId === t._id ? (
                   <>
                     <button

@@ -73,6 +73,12 @@ export default function NavBar() {
                 Chat
                 <FaBrain className="h-3 w-3 text-purple-500 animate-pulse" />
               </Link>
+              <Link
+                href="/dashboard/analytics"
+                className={linkStyle("/dashboard/analytics")}
+              >
+                Analytics
+              </Link>
             </>
           )}
         </nav>
