@@ -26,36 +26,40 @@ export default function AddConceptForm({ topicId }: { topicId: string }) {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-lg text-zinc-100">
+    <div className="container mx-auto p-6 max-w-lg text-zinc-900 dark:text-zinc-100">
       <h1 className="text-2xl font-bold mb-6">Add Concept</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           name="name"
           required
           placeholder="Concept name"
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+          className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
         />
         <textarea
           name="description"
           required
           placeholder="Description"
           rows={3}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+          className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
         />
         <select
           name="difficulty"
           defaultValue="3"
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+          className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
           {[1, 2, 3, 4, 5].map((d) => (
-            <option key={d} value={d}>
+            <option
+              key={d}
+              value={d}
+              className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+            >
               Difficulty {d}
             </option>
           ))}
         </select>
         <button
           disabled={loading}
-          className="w-full bg-purple-600 hover:bg-purple-700 py-2.5 rounded-lg font-medium"
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50"
         >
           {loading ? "Adding..." : "Add Concept"}
         </button>

@@ -26,39 +26,59 @@ export default function AddTopicForm() {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-lg text-zinc-100">
+    <div className="container mx-auto p-6 max-w-lg text-zinc-900 dark:text-zinc-100">
       <h1 className="text-2xl font-bold mb-6">Add New Topic</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <input
           name="name"
           required
           placeholder="Topic name (e.g. Physics)"
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+          className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
         />
         <textarea
           name="description"
           required
           placeholder="Description"
           rows={4}
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+          className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
         />
         <select
           name="category"
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+          className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500"
         >
-          <option value="Technology">Technology</option>
-          <option value="Science">Science</option>
-          <option value="Math">Mathematics</option>
-          <option value="Design">Design</option>
+          <option
+            value="Technology"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            Technology
+          </option>
+          <option
+            value="Science"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            Science
+          </option>
+          <option
+            value="Math"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            Mathematics
+          </option>
+          <option
+            value="Design"
+            className="bg-white dark:bg-zinc-900 text-zinc-900 dark:text-zinc-100"
+          >
+            Design
+          </option>
         </select>
         <input
           name="imageUrl"
           placeholder="Image URL (optional)"
-          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+          className="w-full bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-purple-500 placeholder:text-zinc-400 dark:placeholder:text-zinc-500"
         />
         <button
           disabled={loading}
-          className="w-full bg-purple-600 hover:bg-purple-700 py-2.5 rounded-lg font-medium"
+          className="w-full bg-purple-600 hover:bg-purple-700 text-white py-2.5 rounded-lg font-medium transition-colors disabled:opacity-50"
         >
           {loading ? "Creating..." : "Create Topic"}
         </button>
