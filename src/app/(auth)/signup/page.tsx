@@ -38,6 +38,7 @@ export default function SignUpPage() {
           toast.success(
             "Account created successfully! Welcome to Intelecture.",
           );
+          window.location.href = "/dashboard";
         },
       },
     });

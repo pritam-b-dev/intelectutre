@@ -27,6 +27,7 @@ export default function SignInPage() {
         callbackURL: "/dashboard",
       });
       toast.success("Logged in as Demo User!");
+      window.location.href = "/dashboard";
     } catch {
       toast.error("Demo login failed");
       setIsLoading(false);
@@ -52,6 +53,7 @@ export default function SignInPage() {
 
         onSuccess: () => {
           toast.success("Welcome back to Intelecture!");
+          window.location.href = "/dashboard";
         },
       },
     });
