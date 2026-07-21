@@ -36,3 +36,7 @@ export async function getUserNotes(): Promise<{
 }> {
   return protectedFetch<{ items: Note[]; total: number }>("/api/notes");
 }
+
+export async function deleteNote(id: string): Promise<{ success: boolean }> {
+  return serverMutation<{ success: boolean }>(`/api/notes/${id}`, {}, "DELETE");
+}
