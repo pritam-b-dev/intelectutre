@@ -94,14 +94,6 @@ export default async function DashboardPage() {
         </span>
       </Link>
 
-      {/* Progress Chart Container */}
-      <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-white/80 dark:bg-zinc-900/40 shadow-sm transition-colors mb-10">
-        <h2 className="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100">
-          Progress Overview
-        </h2>
-        <ProgressChart data={chartData} />
-      </div>
-
       {/* AI Recommendations Header */}
       <div className="flex justify-between items-center mb-4 border-b border-zinc-200 dark:border-zinc-800 pb-3">
         <h2 className="text-lg font-semibold flex items-center gap-2 text-zinc-900 dark:text-zinc-100">
@@ -122,7 +114,6 @@ export default async function DashboardPage() {
           </Link>
         </div>
       </div>
-
       {/* Recommendations Cards or Empty State */}
       {recData.items.length === 0 ? (
         <p className="text-zinc-500 dark:text-zinc-400 text-sm border border-dashed border-zinc-300 dark:border-zinc-800 rounded-xl p-8 text-center bg-zinc-50/50 dark:bg-zinc-900/10 transition-colors">
@@ -156,6 +147,13 @@ export default async function DashboardPage() {
           ))}
         </div>
       )}
+      {/* Progress Chart Container */}
+      <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-5 bg-white/80 dark:bg-zinc-900/40 shadow-sm transition-colors mb-10">
+        <h2 className="text-lg font-semibold mb-2 text-zinc-900 dark:text-zinc-100">
+          Progress Overview
+        </h2>
+        <ProgressChart data={chartData} />
+      </div>
     </div>
   );
 }
