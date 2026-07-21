@@ -128,13 +128,13 @@ export default function AIChatSidebar({
 
       {/* Sidebar Panel */}
       <div
-        className={`fixed top-0 right-0 h-full w-full sm:w-96 bg-zinc-950 border-l border-zinc-800 transition-transform duration-300 ease-in-out ${
+        className={`fixed z-999 top-0 right-0 h-full w-full sm:w-96 bg-zinc-950 border-l border-zinc-800 transition-transform duration-300 ease-in-out ${
           isOpen ? "translate-x-0" : "translate-x-full"
         }`}
       >
         {/* Header */}
         <div className="p-4 border-b border-zinc-800 flex justify-between items-center bg-zinc-900/50">
-          <h3 className="text-white font-bold flex items-center gap-2">
+          <h3 className="text-white font-bold flex items-center gap-2 ">
             <FaRobot className="text-purple-400" /> Intelecture AI
           </h3>
           <button
