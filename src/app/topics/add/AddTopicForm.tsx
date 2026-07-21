@@ -16,6 +16,7 @@ export default function AddTopicForm() {
         name: formData.get("name") as string,
         description: formData.get("description") as string,
         category: formData.get("category") as string,
+        imageUrl: formData.get("imageUrl") as string,
       });
       router.push(`/topics/${topic._id}`);
     } catch {
@@ -49,6 +50,11 @@ export default function AddTopicForm() {
           <option value="science">Science</option>
           <option value="math">Mathematics</option>
         </select>
+        <input
+          name="imageUrl"
+          placeholder="Image URL (optional)"
+          className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
+        />
         <button
           disabled={loading}
           className="w-full bg-purple-600 hover:bg-purple-700 py-2.5 rounded-lg font-medium"

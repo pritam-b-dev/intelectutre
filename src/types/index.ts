@@ -39,13 +39,13 @@ export interface Topic {
   name: string;
   description: string;
   category: string;
+  imageUrl?: string;
   ownerId: string;
   ownerName: string;
   conceptCount: number;
   masteredCount: number;
   createdAt: string;
   updatedAt: string;
-  image?: string;
 }
 
 /* -------------------------------------------------------------------------- */

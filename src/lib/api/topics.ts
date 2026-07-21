@@ -6,21 +6,18 @@ import { Topic } from "@/types";
 export async function getTopics(params?: {
   category?: string;
   sort?: string;
-}): Promise<{ items: Topic[]; total: number }> {
-  // ১. শুধু ভ্যালিড এবং "all" নয় এমন প্যারামিটারগুলো ফিল্টার করে নিচ্ছি
+  search?: string;
+  page?: number;
+}): Promise<{ items: Topic[]; total: number; page: number; perPage: number }> {
   const activeParams = params
     ? Object.entries(params).filter((entry) => entry[1] && entry[1] !== "all")
     : [];
-
-  // ২. যদি কোনো অ্যাক্টিভ প্যারামিটার থাকে, তবেই কেবল "?" যোগ হবে, অন্যথায় একদম ক্লিন স্ট্রিং থাকবে
   const queryString =
     activeParams.length > 0
-      ? `?${new URLSearchParams(activeParams).toString()}`
+      ? `?${new URLSearchParams(activeParams as [string, string][]).toString()}`
       : "";
 
-  return serverFetch<{ items: Topic[]; total: number }>(
-    `/api/topics${queryString}`,
-  );
+  return serverFetch(`/api/topics${queryString}`);
 }
 
 export async function getMyTopics(): Promise<{
@@ -38,6 +35,7 @@ export interface CreateTopicRequest {
   name: string;
   description: string;
   category: string;
+  imageUrl?: string;
 }
 
 export async function createTopic(data: CreateTopicRequest): Promise<Topic> {
