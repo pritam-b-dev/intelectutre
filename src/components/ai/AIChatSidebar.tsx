@@ -9,6 +9,7 @@ import {
   FaUser,
 } from "react-icons/fa6";
 import { ChatMessage } from "@/types";
+import { getHistory, sendMessage } from "@/lib/api/chat";
 
 interface AIChatSidebarProps {
   conceptId?: string;
@@ -39,11 +40,7 @@ export default function AIChatSidebar({
   // F18: Fetch History
   const fetchChatHistory = useCallback(async () => {
     try {
-      const response = await fetch(`/api/chat/history?conceptId=${conceptId}`);
-      if (!response.ok) throw new Error("Failed to fetch history");
-
-      const data = await response.json();
-
+      const data = await getHistory(conceptId);
       if (data && data.length > 0) {
         setMessages(data);
       } else {
@@ -54,7 +51,7 @@ export default function AIChatSidebar({
             conceptId,
             role: "assistant",
             message:
-              "Hello! I'm your Intelecture AI study buddy. Ask me anything about this concept or topic!",
+              "Hello! I'm your Intelecture AI study buddy. Ask me anything about this concept!",
             timestamp: new Date().toISOString(),
           },
         ]);
@@ -84,10 +81,38 @@ export default function AIChatSidebar({
     if (e) e.preventDefault();
     if (!input.trim() || isTyping) return;
 
-    // এখানে আপনার স্ট্রিম লজিকটি বসান
-    setIsTyping(false);
-  };
+    const userMessage: ChatMessage = {
+      _id: `temp-${Date.now()}`,
+      userId,
+      conceptId,
+      role: "user",
+      message: input,
+      timestamp: new Date().toISOString(),
+    };
+    setMessages((prev) => [...prev, userMessage]);
+    const messageText = input;
+    setInput("");
+    setIsTyping(true);
 
+    try {
+      const reply = await sendMessage(conceptId, messageText);
+      setMessages((prev) => [...prev, reply]);
+    } catch {
+      setMessages((prev) => [
+        ...prev,
+        {
+          _id: `err-${Date.now()}`,
+          userId,
+          conceptId,
+          role: "assistant",
+          message: "Something went wrong, try again.",
+          timestamp: new Date().toISOString(),
+        },
+      ]);
+    } finally {
+      setIsTyping(false);
+    }
+  };
   return (
     <>
       {/* Floating Trigger */}
