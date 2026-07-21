@@ -46,9 +46,10 @@ export default function AddTopicForm() {
           name="category"
           className="w-full bg-zinc-900 border border-zinc-800 rounded-lg px-3 py-2"
         >
-          <option value="tech">Technology</option>
-          <option value="science">Science</option>
-          <option value="math">Mathematics</option>
+          <option value="Technology">Technology</option>
+          <option value="Science">Science</option>
+          <option value="Math">Mathematics</option>
+          <option value="Design">Design</option>
         </select>
         <input
           name="imageUrl"

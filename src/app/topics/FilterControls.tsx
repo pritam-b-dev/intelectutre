@@ -42,9 +42,10 @@ export function FilterControls({
         className="bg-white dark:bg-zinc-900 border border-zinc-300 dark:border-zinc-800 rounded-lg px-3 py-2 text-sm text-zinc-800 dark:text-zinc-200 cursor-pointer"
       >
         <option value="all">All Categories</option>
-        <option value="tech">Technology</option>
-        <option value="science">Science</option>
-        <option value="math">Mathematics</option>
+        <option value="Technology">Technology</option>
+        <option value="Science">Science</option>
+        <option value="Math">Mathematics</option>
+        <option value="Design">Design</option>
       </select>
       <select
         value={currentSort}
