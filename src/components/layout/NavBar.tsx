@@ -44,7 +44,7 @@ export default function NavBar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         {/* লোগো (🛠️ Tailwind Fix: bg-gradient-to-r -> bg-linear-to-r) */}
         <Link href="/" className="flex items-center space-x-2">
-          <span className="text-xl font-bold bg-linear-to-r from-purple-600 to-indigo-500 dark:from-purple-400 dark:to-indigo-300 bg-clip-text text-transparent">
+          <span className="text-3xl font-bold bg-linear-to-r from-purple-600 to-indigo-500 dark:from-purple-400 dark:to-indigo-300 bg-clip-text text-transparent">
             Intelecture
           </span>
         </Link>

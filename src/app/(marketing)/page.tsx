@@ -13,6 +13,7 @@ import {
 } from "react-icons/fi";
 import { FaGithub, FaXTwitter, FaLinkedinIn } from "react-icons/fa6";
 import { HiSparkles, HiChatBubbleLeftRight } from "react-icons/hi2";
+import Link from "next/link";
 
 const fadeInScale: Variants = {
   hidden: { opacity: 0, y: 40 },
@@ -83,13 +84,22 @@ export default function LandingPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4 pt-4">
-            <button className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-white bg-purple-600 rounded-xl hover:bg-purple-500 transition-colors shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2 group">
-              Get Started Free{" "}
+            {/* Sign up Link */}
+            <Link
+              href="/signup"
+              className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-white bg-purple-600 rounded-xl hover:bg-purple-500 transition-colors shadow-lg shadow-purple-600/20 flex items-center justify-center gap-2 group"
+            >
+              Get Started Free
               <FiArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-            </button>
-            <button className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition-all">
+            </Link>
+
+            {/* Explore Learning Paths Link */}
+            <Link
+              href="/topics"
+              className="w-full sm:w-auto px-8 py-3.5 text-sm font-semibold text-slate-700 dark:text-slate-300 bg-slate-100 dark:bg-slate-900 rounded-xl hover:bg-slate-200 dark:hover:bg-slate-800 border border-slate-200 dark:border-slate-800 transition-all flex items-center justify-center"
+            >
               Explore Learning Paths
-            </button>
+            </Link>
           </div>
         </motion.div>
       </section>
@@ -465,7 +475,7 @@ export default function LandingPage() {
             <ul className="space-y-2.5 text-xs">
               <li>
                 <a
-                  href="#"
+                  href="/about"
                   className="hover:text-purple-600 dark:hover:text-slate-300 transition-colors"
                 >
                   About Us
@@ -473,10 +483,10 @@ export default function LandingPage() {
               </li>
               <li>
                 <a
-                  href="#"
+                  href="/contact"
                   className="hover:text-purple-600 dark:hover:text-slate-300 transition-colors"
                 >
-                  Careers
+                  Contact
                 </a>
               </li>
               <li>
